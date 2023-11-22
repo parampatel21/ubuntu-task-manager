@@ -1,8 +1,8 @@
-//
-// Created by Param Patel on 11/22/23.
-//
+#ifndef TABS_SYSTEM_H
+#define TABS_SYSTEM_H
 
-#ifndef TASK_MANAGER_TABS_SYSTEM_H
-#define TASK_MANAGER_TABS_SYSTEM_H
+#include <gtk/gtk.h>
 
-#endif //TASK_MANAGER_TABS_SYSTEM_H
+void add_system_tab(GtkWidget *notebook);
+
+#endif

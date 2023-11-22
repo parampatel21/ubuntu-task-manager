@@ -1,8 +1,8 @@
-//
-// Created by Param Patel on 11/22/23.
-//
+#ifndef TABS_CPU_H
+#define TABS_CPU_H
 
-#ifndef TASK_MANAGER_TABS_CPU_H
-#define TASK_MANAGER_TABS_CPU_H
+#include <gtk/gtk.h>
 
-#endif //TASK_MANAGER_TABS_CPU_H
+void add_cpu_tab(GtkWidget *notebook);
+
+#endif
