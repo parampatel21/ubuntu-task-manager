@@ -1,1 +1,9 @@
-task_manager
+how to compile project:
+
+navigate to project directory
+
+mkdir build
+cd build
+cmake .
+make
+./task_manager
