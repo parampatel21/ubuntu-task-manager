@@ -6,8 +6,8 @@
 #include <string.h>
 #include <unistd.h>
 
-// Function to get process information based on a specific command
-void getProcessInfo(const char *command, GtkTextBuffer *buffer) {
+// Function to get process information based on a specific command and update text buffer
+void getProcessInfoAndUpdateBuffer(const char *command, GtkTextBuffer *buffer) {
     // Clear the text buffer before adding new information
     gtk_text_buffer_set_text(buffer, "", -1);
 
@@ -26,39 +26,109 @@ void getProcessInfo(const char *command, GtkTextBuffer *buffer) {
     pclose(fp);
 }
 
-// Callback for the Refresh buttonvoid refresh_clicked(GtkWidget *widget, gpointer user_data) {
+// Callbacks for the process actions (replace with actual logic)
+void stop_process() {
+    printf("Stopping process...\n");
+}
+
+void continue_process() {
+    printf("Continuing process...\n");
+}
+
+void kill_process() {
+    printf("Killing process...\n");
+}
+
+void list_memory_maps() {
+    printf("Listing memory maps...\n");
+}
+
+void list_open_files() {
+    printf("Listing open files...\n");
+}
+
+// Function prototype for show_context_menu
+gboolean show_context_menu(GtkWidget *text_view, GdkEventButton *event, GtkWidget *menu);
+
+// Function to create a context menu for right-click on text view
+void createContextMenu(GtkWidget *text_view) {
+    GtkWidget *menu = gtk_menu_new();
+
+    // Create menu items for each action
+    GtkWidget *item_stop = gtk_menu_item_new_with_label("Stop");
+    GtkWidget *item_continue = gtk_menu_item_new_with_label("Continue");
+    GtkWidget *item_kill = gtk_menu_item_new_with_label("Kill");
+    GtkWidget *item_memory_maps = gtk_menu_item_new_with_label("List Memory Maps");
+    GtkWidget *item_open_files = gtk_menu_item_new_with_label("List Open Files");
+
+    // Append menu items to the menu
+    gtk_menu_shell_append(GTK_MENU_SHELL(menu), item_stop);
+    gtk_menu_shell_append(GTK_MENU_SHELL(menu), item_continue);
+    gtk_menu_shell_append(GTK_MENU_SHELL(menu), item_kill);
+    gtk_menu_shell_append(GTK_MENU_SHELL(menu), item_memory_maps);
+    gtk_menu_shell_append(GTK_MENU_SHELL(menu), item_open_files);
+
+    // Show all menu items
+    gtk_widget_show_all(menu);
+
+    // Connect signals for each menu item
+    g_signal_connect(item_stop, "activate", G_CALLBACK(stop_process), NULL);
+    g_signal_connect(item_continue, "activate", G_CALLBACK(continue_process), NULL);
+    g_signal_connect(item_kill, "activate", G_CALLBACK(kill_process), NULL);
+    g_signal_connect(item_memory_maps, "activate", G_CALLBACK(list_memory_maps), NULL);
+    g_signal_connect(item_open_files, "activate", G_CALLBACK(list_open_files), NULL);
+
+    // Connect right-click event to show the context menu
+    g_signal_connect(text_view, "button-press-event", G_CALLBACK(show_context_menu), menu);
+}
+
+// Function to handle right-click event and show context menu
+gboolean show_context_menu(GtkWidget *text_view, GdkEventButton *event, GtkWidget *menu) {
+    if (event->type == GDK_BUTTON_PRESS && event->button == GDK_BUTTON_SECONDARY) {
+        gtk_menu_popup_at_pointer(GTK_MENU(menu), (GdkEvent *)event);
+        return TRUE;
+    }
+    return FALSE;
+}
+
+// Function to update process information for all processes
+void updateProcessInfo(const char *command, GtkTextBuffer *buffer) {
+    getProcessInfoAndUpdateBuffer(command, buffer);
+}
+
+// Callback for the Refresh button
+void refresh_clicked(GtkWidget *widget, gpointer user_data) {
     GtkTextBuffer *buffer = GTK_TEXT_BUFFER(user_data);
     // Call the function to update process information for all processes
-    getProcessInfo("ps aux", buffer);
+    updateProcessInfo("ps aux", buffer);
 }
 
 // Callback for displaying all processes in tree format
 void all_processes_tree_clicked(GtkWidget *widget, gpointer user_data) {
     GtkTextBuffer *buffer = GTK_TEXT_BUFFER(user_data);
     // Call the function to display all processes in tree format
-    getProcessInfo("ps -e --forest", buffer);
+    updateProcessInfo("ps -e --forest", buffer);
 }
 
 // Callback for displaying all processes in list format
 void all_processes_list_clicked(GtkWidget *widget, gpointer user_data) {
     GtkTextBuffer *buffer = GTK_TEXT_BUFFER(user_data);
     // Call the function to display all processes in list format
-    getProcessInfo("ps aux", buffer);
+    updateProcessInfo("ps aux", buffer);
 }
 
 // Callback for displaying user-owned processes in tree format
 void user_processes_tree_clicked(GtkWidget *widget, gpointer user_data) {
     GtkTextBuffer *buffer = GTK_TEXT_BUFFER(user_data);
     // Call the function to display user-owned processes in tree format
-    getProcessInfo("ps -u $(whoami) --forest", buffer);
+    updateProcessInfo("ps -u $(whoami) --forest", buffer);
 }
 
 // Callback for displaying user-owned processes in list format
 void user_processes_list_clicked(GtkWidget *widget, gpointer user_data) {
-
     GtkTextBuffer *buffer = GTK_TEXT_BUFFER(user_data);
     // Call the function to display user-owned processes in list format
-    getProcessInfo("ps -u $(whoami)", buffer);
+    updateProcessInfo("ps -u $(whoami)", buffer);
 }
 
 int main(int argc, char *argv[]) {
@@ -89,6 +159,9 @@ int main(int argc, char *argv[]) {
     gtk_container_add(GTK_CONTAINER(scrolled_window), text_view);
     gtk_box_pack_start(GTK_BOX(vbox), scrolled_window, TRUE, TRUE, 0);
 
+    // Create and set up the context menu
+    createContextMenu(text_view);
+
     GtkWidget *btn_refresh = gtk_button_new_with_label("Refresh");
     GtkWidget *btn_all_processes_tree = gtk_button_new_with_label("All Processes (Tree)");
     GtkWidget *btn_all_processes_list = gtk_button_new_with_label("All Processes (List)");
@@ -108,6 +181,9 @@ int main(int argc, char *argv[]) {
     gtk_box_pack_start(GTK_BOX(vbox), btn_user_processes_list, FALSE, FALSE, 0);
 
     gtk_widget_show_all(window);
+
+    // Update process information for all processes by default
+    updateProcessInfo("ps aux", buffer);
 
     gtk_main();
 
