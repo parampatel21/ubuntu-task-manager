@@ -1,5 +1,6 @@
 #include "tabs_system.h"
 #include <gtk/gtk.h>
+#include <glib.h>
 
 void add_system_tab(GtkWidget *notebook) {
     GtkWidget *system_label = gtk_label_new("System");
@@ -39,6 +40,17 @@ void add_system_tab(GtkWidget *notebook) {
     GtkWidget *os_label = gtk_label_new(OS_name);
     GtkWidget *kernel_label = gtk_label_new(kernel);
 
+    FILE *cpu_fp;
+    char cpu_info[100] = " ";
+    cpu_fp = popen("lscpu | grep 'Model name:'", "r");
+    fgets(cpu_info, 100, cpu_fp);
+    pclose(cpu_fp);
+
+    char *trimmed_cpu_info = g_strstrip(cpu_info + strlen("Model name:"));
+    char cpu_label_text[100];
+    snprintf(cpu_label_text, sizeof(cpu_label_text), "Processor: %s", trimmed_cpu_info);
+    GtkWidget *cpu_label = gtk_label_new(cpu_label_text);
+
     char memory_label_text[100];
     snprintf(memory_label_text, sizeof(memory_label_text), "Memory: %.2f GiB", total_memory_gb);
     GtkWidget *memory_label = gtk_label_new(memory_label_text);
@@ -47,14 +59,20 @@ void add_system_tab(GtkWidget *notebook) {
     snprintf(disk_label_text, sizeof(disk_label_text), "Available Disk Space: %.2f GiB", available_disk_gb);
     GtkWidget *disk_label = gtk_label_new(disk_label_text);
 
-    GtkWidget *box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5); // 5 is the spacing
+    GtkWidget *box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
+
+    GtkWidget *header = gtk_label_new(NULL);
+    gtk_label_set_markup(GTK_LABEL(header), "<b>System Information</b>");
+
+    gtk_box_pack_start(GTK_BOX(box), header, FALSE, FALSE, 0);
 
     gtk_box_pack_start(GTK_BOX(box), os_label, FALSE, FALSE, 0);
     gtk_box_pack_start(GTK_BOX(box), kernel_label, FALSE, FALSE, 0);
     gtk_box_pack_start(GTK_BOX(box), memory_label, FALSE, FALSE, 0);
+    gtk_box_pack_start(GTK_BOX(box), cpu_label, FALSE, FALSE, 0);
     gtk_box_pack_start(GTK_BOX(box), disk_label, FALSE, FALSE, 0);
 
-    GtkWidget *system_tab = gtk_label_new(NULL);
-    gtk_label_set_markup(GTK_LABEL(system_tab), "<b>System Information</b>"); // Optional: Set bold text
+
     gtk_notebook_append_page(GTK_NOTEBOOK(notebook), box, system_label);
 }
+
