@@ -1,4 +1,3 @@
-//
 #include "process_info.h"
 //#include <gtk/gtk.h>
 //#include <stdio.h>
