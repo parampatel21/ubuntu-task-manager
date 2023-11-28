@@ -2,8 +2,9 @@ how to compile project:
 
 navigate to project directory
 
+rm -r build
 mkdir build
 cd build
-cmake .
+cmake ..
 make
 ./task_manager
