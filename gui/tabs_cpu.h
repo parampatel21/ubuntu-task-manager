@@ -6,7 +6,7 @@
 typedef struct {
     GtkWidget *drawing_area;
     guint graph_update_timeout;
-    double thread_usage[MAX_THREADS];
+    double thread_usage[256];
     int num_threads;
 } cpu_info;
 
