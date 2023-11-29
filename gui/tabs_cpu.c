@@ -1,76 +1,58 @@
-#include <gtk/gtk.h>
 #include <stdio.h>
 #include <string.h>
+#include <gtk/gtk.h>
 
-#define MAX_CORES 16
+GtkWidget *cpu_tab;
 
-GtkWidget *cpu_labels[MAX_CORES];
-unsigned long long prev_cpu_values[MAX_CORES][4];
+void update_cpu_tab(GtkWidget *labels[]) {
+    FILE *mpstat_fp;
+    char mpstat_buffer[5000];
+    mpstat_fp = popen("mpstat -P ALL 1 1", "r");  // Run the command for 1 second to get updated values
+    fgets(mpstat_buffer, sizeof(mpstat_buffer), mpstat_fp);
+    pclose(mpstat_fp);
 
-// Function to read CPU usage from /proc/stat
-void read_cpu_usage(double cpu_usage[MAX_CORES]) {
-    FILE *fp = fopen("/proc/stat", "r");
-    if (fp == NULL) {
-        perror("Error opening /proc/stat");
-        exit(EXIT_FAILURE);
-    }
+    char *line = strtok(mpstat_buffer, "\n");
+    int core_index = 0;
 
-    char line[256];
-    while (fgets(line, sizeof(line), fp)) {
-        if (strncmp(line, "cpu", 3) == 0) {
-            int core;
-            sscanf(line, "cpu%d", &core);
-            if (core >= 0 && core < MAX_CORES) {
-                unsigned long long user, nice, sys, idle;
-                sscanf(line + 3, "%llu %llu %llu %llu", &user, &nice, &sys, &idle);
+    while (line != NULL) {
+        if (strstr(line, "all") == NULL && strstr(line, "CPU") == NULL) {
+            double usage;
+            sscanf(line + 13, "%lf", &usage);
 
-                unsigned long long total = user + nice + sys + idle;
-                unsigned long long prev_total = prev_cpu_values[core][0] +
-                                                prev_cpu_values[core][1] +
-                                                prev_cpu_values[core][2] +
-                                                prev_cpu_values[core][3];
+            char label_text[50];
+            snprintf(label_text, sizeof(label_text), "Core %d: %.2f%%", core_index, usage);
 
-                unsigned long long diff_total = total - prev_total;
-
-                if (diff_total > 0) {
-                    double usage = ((double)(total - idle - prev_total) / diff_total) * 100.0;
-                    prev_cpu_values[core][0] = user;
-                    prev_cpu_values[core][1] = nice;
-                    prev_cpu_values[core][2] = sys;
-                    prev_cpu_values[core][3] = idle;
-
-                    // Update the label text
-                    char label_text[50];
-                    snprintf(label_text, sizeof(label_text), "Core %d Usage: %.2f%%", core, usage);
-                    gtk_label_set_text(GTK_LABEL(cpu_labels[core]), label_text);
-                }
-            }
+            gtk_label_set_text(GTK_LABEL(labels[core_index]), label_text);
+            core_index++;
         }
-    }
 
-    fclose(fp);
+        line = strtok(NULL, "\n");
+    }
 }
 
-// Callback function for updating CPU usage
-gboolean update_cpu_usage(gpointer user_data) {
-    double cpu_usage[MAX_CORES] = {0};
-    read_cpu_usage(cpu_usage);
+gboolean update_cpu_tab_timeout(gpointer user_data) {
+    GtkWidget **labels = (GtkWidget **)user_data;
+    update_cpu_tab(labels);
     return G_SOURCE_CONTINUE;
 }
 
 void add_cpu_tab(GtkWidget *notebook) {
-    GtkWidget *cpu_tab = gtk_grid_new();
-    gtk_grid_set_column_spacing(GTK_GRID(cpu_tab), 10);
-    gtk_grid_set_row_spacing(GTK_GRID(cpu_tab), 10);
+    GtkWidget *cpu_label = gtk_label_new("CPU");
 
-    for (int i = 0; i < MAX_CORES; ++i) {
-        cpu_labels[i] = gtk_label_new("");
-        gtk_grid_attach(GTK_GRID(cpu_tab), cpu_labels[i], 0, i, 1, 1);
+    // Create a grid to organize labels
+    GtkWidget *grid = gtk_grid_new();
+    gtk_container_add(GTK_CONTAINER(cpu_tab), grid);
+
+    // Create an array of labels for each core
+    GtkWidget *core_labels[8];
+    for (int i = 0; i < 8; i++) {
+        core_labels[i] = gtk_label_new("");
+        gtk_grid_attach(GTK_GRID(grid), core_labels[i], 0, i, 1, 1);
     }
 
-    // Add the CPU tab to the notebook
-    gtk_notebook_append_page(GTK_NOTEBOOK(notebook), cpu_tab, gtk_label_new("CPU"));
+    // Append the grid to the notebook
+    gtk_notebook_append_page(GTK_NOTEBOOK(notebook), cpu_tab, cpu_label);
 
-    // Add timeout function to update CPU usage
-    g_timeout_add(1000, update_cpu_usage, NULL);
+    // Update the CPU tab every half second
+    g_timeout_add(500, update_cpu_tab_timeout, core_labels);
 }

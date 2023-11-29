@@ -35,6 +35,7 @@ void add_system_tab(GtkWidget *notebook) {
     fgets(disk_info, 50, disk_fp);
     pclose(disk_fp);
 
+
     double available_disk_gb = atof(disk_info) / (1024.0 * 1024.0);
 
     GtkWidget *os_label = gtk_label_new(OS_name);
