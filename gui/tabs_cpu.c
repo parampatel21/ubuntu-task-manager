@@ -59,23 +59,40 @@ const gchar* get_cpu_usage_string() {
 }
 
 // Timer callback function to update CPU usage at regular intervals
-gboolean update_timer_callback(GtkLabel *label) {
+gboolean update_timer_callback(GtkBox *box) {
     const gchar *cpu_usage_str = get_cpu_usage_string();
-    gtk_label_set_text(label, cpu_usage_str);
+
+    // Clear existing labels in the box
+    GList *children, *iter;
+    children = gtk_container_get_children(GTK_CONTAINER(box));
+    for (iter = children; iter != NULL; iter = g_list_next(iter)) {
+        gtk_widget_destroy(GTK_WIDGET(iter->data));
+    }
+    g_list_free(children);
+
+    // Create a label for each core
+    gchar** lines = g_strsplit(cpu_usage_str, "\n", -1);
+    for (int i = 0; lines[i] != NULL; ++i) {
+        GtkWidget *label = gtk_label_new(lines[i]);
+        gtk_box_pack_start(box, label, FALSE, FALSE, 0);
+    }
+    g_strfreev(lines);
+
+    gtk_widget_show_all(GTK_WIDGET(box));
     return TRUE;
 }
 
 void add_cpu_tab(GtkWidget *notebook) {
     GtkWidget *cpu_label = gtk_label_new("CPU");
 
-    // Create a GtkLabel to display CPU usage
-    GtkWidget *cpu_tab = gtk_label_new("Initializing...");
-    GtkLabel *cpu_label_widget = GTK_LABEL(cpu_tab);
+    // Create a GtkBox to contain the labels for each core
+    GtkWidget *cpu_tab = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
+    GtkBox *cpu_box = GTK_BOX(cpu_tab);
 
     gtk_notebook_append_page(GTK_NOTEBOOK(notebook), cpu_tab, cpu_label);
 
     // Set up a timer to update CPU usage every second (adjust as needed)
-    guint timer_id = g_timeout_add_seconds(1, (GSourceFunc)update_timer_callback, cpu_label_widget);
+    guint timer_id = g_timeout_add_seconds(1, (GSourceFunc)update_timer_callback, cpu_box);
 
     // You might want to store the timer ID somewhere if you need to stop the timer later
     // g_source_remove(timer_id);
