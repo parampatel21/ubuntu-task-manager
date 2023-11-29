@@ -1,97 +1,46 @@
-#include <gtk/gtk.h>
-#include <gio/gio.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <string.h>
+#include <gtk/gtk.h>
 
-#define MAX_BUFFER_SIZE 4096
-
-GtkWidget *cpu_tab;
+// Global variables for GTK
 GtkWidget *cpu_text_view;
+GtkTextBuffer *cpu_text_buffer;
 
-void update_cpu_info() {
+void update_cpu_tab() {
     FILE *fp;
-    char buffer[MAX_BUFFER_SIZE];
+    char path[1035];
 
-    // Run mpstat -P ALL command and read the output
+    // Run the mpstat -P ALL command and capture the output
     fp = popen("mpstat -P ALL 1 1", "r");
     if (fp == NULL) {
-        perror("Error running mpstat");
+        printf("Error opening pipe!\n");
         return;
     }
 
-    // Read the output into the buffer
-    size_t bytesRead = fread(buffer, 1, sizeof(buffer), fp);
-    buffer[bytesRead] = '\0';
+    // Clear the existing text in the text view
+    gtk_text_buffer_set_text(cpu_text_buffer, "", -1);
 
-    // Close the file stream
-    pclose(fp);
+    // Read the output line by line
+    while (fgets(path, sizeof(path)-1, fp) != NULL) {
+        // Look for lines starting with "Average:"
+        if (strstr(path, "Average:") != NULL) {
+            int core;
+            float usage;
 
-    // Get the text buffer from the text view
-    GtkTextBuffer *text_buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(cpu_text_view));
+            // Parse the output to retrieve core number and usage
+            sscanf(path, "Average: %d %*s %*s %*s %*s %*s %*s %*s %*s %*s %f", &core, &usage);
 
-    // Clear the existing text in the buffer
-    gtk_text_buffer_set_text(text_buffer, "", -1);
-
-    // Append the new output to the buffer
-    gtk_text_buffer_insert_at_cursor(text_buffer, buffer, -1);
-}
-
-gboolean update_callback(gpointer user_data) {
-    // Update the CPU information
-    update_cpu_info();
-
-    // Return TRUE to continue calling this function periodically
-    return TRUE;
-}
-
-void async_update_cpu_info() {
-    // Create a child process to run the mpstat command
-    GPid pid;
-    gchar *stdout_contents = NULL;
-    GError *error = NULL;
-
-    gboolean result = g_spawn_sync(
-            NULL,               // working directory
-            (char *[]){        // command and arguments
-                    "/bin/sh",
-                    "-c",
-                    "mpstat -P ALL 1 1",
-                    NULL
-            },
-            NULL,               // environment variables
-            G_SPAWN_SEARCH_PATH,
-            NULL,               // child setup function
-            NULL,               // user data
-            &stdout_contents,  // standard output
-            NULL,               // standard error
-            &pid,               // process ID
-            &error              // GError
-    );
-
-    if (result) {
-        // Get the text buffer from the text view
-        GtkTextBuffer *text_buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(cpu_text_view));
-
-        // Clear the existing text in the buffer
-        gtk_text_buffer_set_text(text_buffer, "", -1);
-
-        // Append the new output to the buffer
-        gtk_text_buffer_insert_at_cursor(text_buffer, stdout_contents, -1);
-
-        g_free(stdout_contents);
-    } else {
-        g_error("Error running mpstat: %s", error->message);
-        g_error_free(error);
+            // Append the result to the text buffer
+            char buffer[50];
+            sprintf(buffer, "Core %d: %.2f%%\n", core, usage);
+            gtk_text_buffer_insert_at_cursor(cpu_text_buffer, buffer, -1);
+        }
     }
-}
 
-gboolean async_update_callback(gpointer user_data) {
-    // Update the CPU information asynchronously
-    async_update_cpu_info();
-
-    // Return TRUE to continue calling this function periodically
-    return TRUE;
+    // Close the pipe
+    pclose(fp);
 }
 
 void add_cpu_tab(GtkWidget *notebook) {
@@ -99,20 +48,23 @@ void add_cpu_tab(GtkWidget *notebook) {
 
     // Create a scrolled window to contain the text view
     GtkWidget *scrolled_window = gtk_scrolled_window_new(NULL, NULL);
-    gtk_container_set_border_width(GTK_CONTAINER(scrolled_window), 10);
+    gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled_window),
+                                   GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 
-    // Create a text view to display the CPU information
+    // Create a text view and add it to the scrolled window
     cpu_text_view = gtk_text_view_new();
     gtk_text_view_set_editable(GTK_TEXT_VIEW(cpu_text_view), FALSE);
-
-    // Add the text view to the scrolled window
     gtk_container_add(GTK_CONTAINER(scrolled_window), cpu_text_view);
 
-    // Create the CPU tab with the scrolled window
-    cpu_tab = gtk_label_new(NULL);
-    gtk_label_set_markup(GTK_LABEL(cpu_tab), "<b>This is the CPU tab content</b>");
-    gtk_notebook_append_page(GTK_NOTEBOOK(notebook), scrolled_window, cpu_label);
+    // Get the text buffer associated with the text view
+    cpu_text_buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(cpu_text_view));
 
-    // Set up a timer to update the CPU information every second
-    g_timeout_add_seconds(1, async_update_callback, NULL);
+    // Create the CPU tab
+    GtkWidget *cpu_tab = scrolled_window;
+
+    // Append the CPU tab to the notebook
+    gtk_notebook_append_page(GTK_NOTEBOOK(notebook), cpu_tab, cpu_label);
+
+    // Update the CPU tab content every second
+    g_timeout_add_seconds(1, (GSourceFunc)update_cpu_tab, NULL);
 }
