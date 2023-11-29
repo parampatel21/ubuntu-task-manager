@@ -1,82 +1,53 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <pthread.h>
 #include <gtk/gtk.h>
+#include <stdio.h>
 
-// Structure to hold CPU information
-typedef struct {
-    float usage[8];  // Assuming you have 8 cores, adjust as needed
-} CPUInfo;
+#define MAX_BUFFER_SIZE 4096
 
-// Function to parse the output of mpstat
-void parse_mpstat_output(const char *output, CPUInfo *cpu_info) {
-    const char *delimiter = " \t";
-    const char *line = strtok((char *)output, "\n");
+GtkWidget *cpu_tab;
+GtkWidget *cpu_text_view;
 
-    // Skip the first two lines
-    for (int i = 0; i < 2; ++i) {
-        line = strtok(NULL, "\n");
+void update_cpu_info() {
+    FILE *fp;
+    char buffer[MAX_BUFFER_SIZE];
+
+    fp = popen("mpstat -P ALL 1 1", "r");
+    if (fp == NULL) {
+        perror("Error running mpstat");
+        return;
     }
 
-    // Parse the rest of the lines to get CPU usage
-    int core = 0;
-    while (line != NULL && core < 8) {
-        sscanf(line, "%*s %f", &cpu_info->usage[core]);
-        line = strtok(NULL, "\n");
-        core++;
-    }
+    size_t bytesRead = fread(buffer, 1, sizeof(buffer), fp);
+    buffer[bytesRead] = '\0';
+
+    pclose(fp);
+
+    GtkTextBuffer *text_buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(cpu_text_view));
+
+    gtk_text_buffer_set_text(text_buffer, "", -1);
+
+    gtk_text_buffer_insert_at_cursor(text_buffer, buffer, -1);
 }
 
-// Function to run mpstat command and update CPU information
-void *update_cpu_info(void *data) {
-    CPUInfo *cpu_info = (CPUInfo *)data;
+gboolean update_callback(gpointer user_data) {
+    update_cpu_info();
 
-    while (1) {
-        FILE *fp = popen("mpstat -P ALL 1 1", "r");
-        if (fp != NULL) {
-            char buffer[1024];
-            size_t bytesRead = fread(buffer, 1, sizeof(buffer) - 1, fp);
-            buffer[bytesRead] = '\0';
-
-            parse_mpstat_output(buffer, cpu_info);
-
-            pclose(fp);
-        }
-
-        // Sleep for 1 second
-        sleep(1);
-    }
-
-    return NULL;
+    return TRUE;
 }
 
-// Function to update the GTK GUI with CPU information
-gboolean update_gui(gpointer user_data) {
-    CPUInfo *cpu_info = (CPUInfo *)user_data;
-
-    // TODO: Update GTK GUI with cpu_info->usage
-    // For simplicity, let's print the CPU usage to the console
-    printf("CPU Usage: ");
-    for (int i = 0; i < 8; ++i) {
-        printf("Core %d: %.2f%% ", i, cpu_info->usage[i]);
-    }
-    printf("\n");
-
-    return G_SOURCE_CONTINUE;
-}
-
-// Function to add CPU tab to the notebook
 void add_cpu_tab(GtkWidget *notebook) {
     GtkWidget *cpu_label = gtk_label_new("CPU");
-    GtkWidget *cpu_tab = gtk_label_new("This is the CPU tab content");
 
-    gtk_notebook_append_page(GTK_NOTEBOOK(notebook), cpu_tab, cpu_label);
+    GtkWidget *scrolled_window = gtk_scrolled_window_new(NULL, NULL);
+    gtk_container_set_border_width(GTK_CONTAINER(scrolled_window), 10);
 
-    // Create a thread to update CPU information
-    pthread_t thread;
-    pthread_create(&thread, NULL, update_cpu_info, NULL);
+    cpu_text_view = gtk_text_view_new();
+    gtk_text_view_set_editable(GTK_TEXT_VIEW(cpu_text_view), FALSE);
 
-    // Create a timer to update the GUI periodically
-    g_timeout_add_seconds(1, update_gui, NULL);
+    gtk_container_add(GTK_CONTAINER(scrolled_window), cpu_text_view);
+
+    cpu_tab = gtk_label_new(NULL);
+    gtk_label_set_markup(GTK_LABEL(cpu_tab), "<b>This is the CPU tab content</b>");
+    gtk_notebook_append_page(GTK_NOTEBOOK(notebook), scrolled_window, cpu_label);
+
+    g_timeout_add_seconds(1, update_callback, NULL);
 }
