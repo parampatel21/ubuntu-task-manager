@@ -6,6 +6,8 @@
 #include <string.h>
 #include <unistd.h>
 
+/*
+
 // Function to get process information based on a specific command and update text buffer
 void getProcessInfoAndUpdateBuffer(const char *command, GtkTextBuffer *buffer) {
     // Clear the text buffer before adding new information
@@ -189,4 +191,6 @@ int main(int argc, char *argv[]) {
 
     return 0;
 }
+
+*/
 
