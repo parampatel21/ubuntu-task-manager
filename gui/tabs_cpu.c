@@ -1,99 +1,68 @@
-#include "tabs_cpu.h"
 #include <gtk/gtk.h>
+#include <stdio.h>
+#include <string.h>
 
-#define MAX_CORES 32 // Adjust this based on your system's maximum number of CPU cores
+#define MAX_CORES 16
 
-// Function to retrieve CPU usage for each core and format it as a string
-const gchar* get_cpu_usage_string() {
-    FILE* fp = fopen("/proc/stat", "r");
+GtkWidget *cpu_labels[MAX_CORES];
 
+// Function to read CPU usage from /proc/stat
+void read_cpu_usage(double cpu_usage[MAX_CORES]) {
+    FILE *fp = fopen("/proc/stat", "r");
     if (fp == NULL) {
         perror("Error opening /proc/stat");
-        return "Error";
+        exit(EXIT_FAILURE);
     }
 
-    unsigned long user, nice, system, idle, iowait, irq, softirq;
-    unsigned long total_time1 = 0, total_time2 = 0;
-    unsigned long usage[MAX_CORES];
-    int core_count = -1; // Start from -1 to exclude the total line from /proc/stat
+    char line[256];
+    while (fgets(line, sizeof(line), fp)) {
+        if (strncmp(line, "cpu", 3) == 0) {
+            int core;
+            sscanf(line, "cpu%d", &core);
+            if (core >= 0 && core < MAX_CORES) {
+                unsigned long long user, nice, sys, idle;
+                sscanf(line + 3, "%llu %llu %llu %llu", &user, &nice, &sys, &idle);
 
-    // Read the CPU usage data
-    while (fscanf(fp, "cpu%*d %lu %lu %lu %lu %lu %lu %lu", &user, &nice, &system, &idle, &iowait, &irq, &softirq) == 7) {
-        total_time1 += user + nice + system + idle + iowait + irq + softirq;
-        usage[++core_count] = total_time1;
+                unsigned long long total = user + nice + sys + idle;
+                unsigned long long diff_total = total - cpu_usage[core];
+
+                if (diff_total > 0) {
+                    double usage = ((double)(total - idle - cpu_usage[core]) / diff_total) * 100.0;
+                    cpu_usage[core] = total - idle;
+                    g_print("Core %d Usage: %.2f%%\n", core, usage);
+
+                    // Update the label text
+                    char label_text[50];
+                    snprintf(label_text, sizeof(label_text), "Core %d Usage: %.2f%%", core, usage);
+                    gtk_label_set_text(GTK_LABEL(cpu_labels[core]), label_text);
+                }
+            }
+        }
     }
 
     fclose(fp);
-
-    // Wait for a short duration to calculate the CPU usage difference
-    g_usleep(100000);
-
-    fp = fopen("/proc/stat", "r");
-
-    if (fp == NULL) {
-        perror("Error opening /proc/stat");
-        return "Error";
-    }
-
-    total_time2 = 0;
-    core_count = -1;
-
-    // Read the CPU usage data again
-    while (fscanf(fp, "cpu%*d %lu %lu %lu %lu %lu %lu %lu", &user, &nice, &system, &idle, &iowait, &irq, &softirq) == 7) {
-        total_time2 += user + nice + system + idle + iowait + irq + softirq;
-        usage[++core_count] = total_time2;
-    }
-
-    fclose(fp);
-
-    // Calculate and format CPU usage for each core
-    static gchar cpu_usage_str[1024];
-    g_snprintf(cpu_usage_str, sizeof(cpu_usage_str), "CPU Usage:\n");
-
-    for (int i = 0; i <= core_count; ++i) {
-        double cpu_usage = (double)(usage[i] - usage[i - 1]) / (total_time2 - total_time1) * 100.0;
-        g_snprintf(cpu_usage_str + strlen(cpu_usage_str), sizeof(cpu_usage_str) - strlen(cpu_usage_str), "Core %d: %.2f%%\n", i, cpu_usage);
-    }
-
-    return cpu_usage_str;
 }
 
-// Timer callback function to update CPU usage at regular intervals
-gboolean update_timer_callback(GtkBox *box) {
-    const gchar *cpu_usage_str = get_cpu_usage_string();
-
-    // Clear existing labels in the box
-    GList *children, *iter;
-    children = gtk_container_get_children(GTK_CONTAINER(box));
-    for (iter = children; iter != NULL; iter = g_list_next(iter)) {
-        gtk_widget_destroy(GTK_WIDGET(iter->data));
-    }
-    g_list_free(children);
-
-    // Create a label for each core
-    gchar** lines = g_strsplit(cpu_usage_str, "\n", -1);
-    for (int i = 0; lines[i] != NULL; ++i) {
-        GtkWidget *label = gtk_label_new(lines[i]);
-        gtk_box_pack_start(box, label, FALSE, FALSE, 0);
-    }
-    g_strfreev(lines);
-
-    gtk_widget_show_all(GTK_WIDGET(box));
-    return TRUE;
+// Callback function for updating CPU usage
+gboolean update_cpu_usage(gpointer user_data) {
+    double cpu_usage[MAX_CORES] = {0};
+    read_cpu_usage(cpu_usage);
+    return G_SOURCE_CONTINUE;
 }
 
 void add_cpu_tab(GtkWidget *notebook) {
-    GtkWidget *cpu_label = gtk_label_new("CPU");
+    GtkWidget *cpu_tab = gtk_grid_new();
+    gtk_grid_set_column_spacing(GTK_GRID(cpu_tab), 10);
+    gtk_grid_set_row_spacing(GTK_GRID(cpu_tab), 10);
 
-    // Create a GtkBox to contain the labels for each core
-    GtkWidget *cpu_tab = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
-    GtkBox *cpu_box = GTK_BOX(cpu_tab);
+    for (int i = 0; i < MAX_CORES; ++i) {
+        cpu_labels[i] = gtk_label_new("");
+        gtk_grid_attach(GTK_GRID(cpu_tab), cpu_labels[i], 0, i, 1, 1);
+    }
 
-    gtk_notebook_append_page(GTK_NOTEBOOK(notebook), cpu_tab, cpu_label);
+    // Add the CPU tab to the notebook
+    gtk_notebook_append_page(GTK_NOTEBOOK(notebook), cpu_tab, gtk_label_new("CPU"));
 
-    // Set up a timer to update CPU usage every second (adjust as needed)
-    guint timer_id = g_timeout_add_seconds(1, (GSourceFunc)update_timer_callback, cpu_box);
-
-    // You might want to store the timer ID somewhere if you need to stop the timer later
-    // g_source_remove(timer_id);
+    // Add timeout function to update CPU usage
+    g_timeout_add(1000, update_cpu_usage, NULL);
 }
