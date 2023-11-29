@@ -41,7 +41,7 @@ const gchar* get_cpu_usage_string() {
     // Read the CPU usage data again
     while (fscanf(fp, "cpu%*d %lu %lu %lu %lu %lu %lu %lu", &user, &nice, &system, &idle, &iowait, &irq, &softirq) == 7) {
         total_time2 += user + nice + system + idle + iowait + irq + softirq;
-        usage[++core_count] = total_time2 - usage[core_count];
+        usage[++core_count] = total_time2;
     }
 
     fclose(fp);
@@ -51,7 +51,7 @@ const gchar* get_cpu_usage_string() {
     g_snprintf(cpu_usage_str, sizeof(cpu_usage_str), "CPU Usage:\n");
 
     for (int i = 0; i <= core_count; ++i) {
-        double cpu_usage = (double)(usage[i] - idle) / usage[i] * 100.0;
+        double cpu_usage = (double)(usage[i] - usage[i - 1]) / (total_time2 - total_time1) * 100.0;
         g_snprintf(cpu_usage_str + strlen(cpu_usage_str), sizeof(cpu_usage_str) - strlen(cpu_usage_str), "Core %d: %.2f%%\n", i, cpu_usage);
     }
 
