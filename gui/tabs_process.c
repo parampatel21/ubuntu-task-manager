@@ -125,23 +125,23 @@ void add_process_tab(GtkWidget *notebook) {
     updateProcessInfoAndDisplay("ps aux", buffer);
 }
 
-int main(int argc, char *argv[]) {
-    gtk_init(&argc, &argv);
-
-    GtkWidget *window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-    gtk_window_set_title(GTK_WINDOW(window), "Process Info");
-    gtk_container_set_border_width(GTK_CONTAINER(window), 10);
-    gtk_widget_set_size_request(window, 600, 400);
-    g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
-
-    GtkWidget *notebook = gtk_notebook_new();
-    gtk_container_add(GTK_CONTAINER(window), notebook);
-
-    add_process_tab(notebook);
-
-    gtk_widget_show_all(window);
-
-    gtk_main();
-
-    return 0;
-}
+//int main(int argc, char *argv[]) {
+//    gtk_init(&argc, &argv);
+//
+//    GtkWidget *window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+//    gtk_window_set_title(GTK_WINDOW(window), "Process Info");
+//    gtk_container_set_border_width(GTK_CONTAINER(window), 10);
+//    gtk_widget_set_size_request(window, 600, 400);
+//    g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
+//
+//    GtkWidget *notebook = gtk_notebook_new();
+//    gtk_container_add(GTK_CONTAINER(window), notebook);
+//
+//    add_process_tab(notebook);
+//
+//    gtk_widget_show_all(window);
+//
+//    gtk_main();
+//
+//    return 0;
+//}
