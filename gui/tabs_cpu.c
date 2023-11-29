@@ -1,62 +1,82 @@
-#include "tabs_cpu.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <pthread.h>
 #include <gtk/gtk.h>
 
-// Structure to hold data for each core
+// Structure to hold CPU information
 typedef struct {
-    GtkWidget *label;
-    int core_number;
-} CoreData;
+    float usage[8];  // Assuming you have 8 cores, adjust as needed
+} CPUInfo;
 
-// Function to update core usage labels
-void update_core_labels(CoreData *core_data) {
-    FILE *mpstat_fp;
-    char mpstat_buffer[5000];
-    mpstat_fp = popen("mpstat -P ALL 1 1", "r"); // Run the command for 1 second to get updated values
-    fgets(mpstat_buffer, sizeof(mpstat_buffer), mpstat_fp);
-    pclose(mpstat_fp);
+// Function to parse the output of mpstat
+void parse_mpstat_output(const char *output, CPUInfo *cpu_info) {
+    const char *delimiter = " \t";
+    const char *line = strtok((char *)output, "\n");
 
-    // Find the line with core usage information
-    char *line = strstr(mpstat_buffer, "all");
-    if (line != NULL) {
-        // Move to the next line to get the core details
+    // Skip the first two lines
+    for (int i = 0; i < 2; ++i) {
         line = strtok(NULL, "\n");
+    }
 
-        while (line != NULL) {
-            int core;
-            float usage;
-            sscanf(line, "%*s %d %*f %*f %*f %*f %*f %*f %*f %*f %*f %f", &core, &usage);
-
-            // Update the corresponding label
-            if (core_data[core].label != NULL) {
-                char text[50];
-                snprintf(text, sizeof(text), "Core %d: %.2f%%", core, usage);
-                gtk_label_set_text(GTK_LABEL(core_data[core].label), text);
-            }
-
-            line = strtok(NULL, "\n");
-        }
+    // Parse the rest of the lines to get CPU usage
+    int core = 0;
+    while (line != NULL && core < 8) {
+        sscanf(line, "%*s %f", &cpu_info->usage[core]);
+        line = strtok(NULL, "\n");
+        core++;
     }
 }
 
-// Function to create the CPU tab
-void add_cpu_tab(GtkWidget *notebook) {
-    GtkWidget *cpu_label = gtk_label_new("CPU");
-    GtkWidget *cpu_tab = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
+// Function to run mpstat command and update CPU information
+void *update_cpu_info(void *data) {
+    CPUInfo *cpu_info = (CPUInfo *)data;
 
-    // Array to hold core data
-    int num_cores = 8; // Change this according to the number of cores on your system
-    CoreData core_data[num_cores];
+    while (1) {
+        FILE *fp = popen("mpstat -P ALL 1 1", "r");
+        if (fp != NULL) {
+            char buffer[1024];
+            size_t bytesRead = fread(buffer, 1, sizeof(buffer) - 1, fp);
+            buffer[bytesRead] = '\0';
 
-    // Create labels for each core
-    for (int i = 0; i < num_cores; i++) {
-        core_data[i].label = gtk_label_new(NULL);
-        core_data[i].core_number = i;
-        gtk_box_pack_start(GTK_BOX(cpu_tab), core_data[i].label, FALSE, FALSE, 0);
+            parse_mpstat_output(buffer, cpu_info);
+
+            pclose(fp);
+        }
+
+        // Sleep for 1 second
+        sleep(1);
     }
 
-    // Add the CPU tab to the notebook
+    return NULL;
+}
+
+// Function to update the GTK GUI with CPU information
+gboolean update_gui(gpointer user_data) {
+    CPUInfo *cpu_info = (CPUInfo *)user_data;
+
+    // TODO: Update GTK GUI with cpu_info->usage
+    // For simplicity, let's print the CPU usage to the console
+    printf("CPU Usage: ");
+    for (int i = 0; i < 8; ++i) {
+        printf("Core %d: %.2f%% ", i, cpu_info->usage[i]);
+    }
+    printf("\n");
+
+    return G_SOURCE_CONTINUE;
+}
+
+// Function to add CPU tab to the notebook
+void add_cpu_tab(GtkWidget *notebook) {
+    GtkWidget *cpu_label = gtk_label_new("CPU");
+    GtkWidget *cpu_tab = gtk_label_new("This is the CPU tab content");
+
     gtk_notebook_append_page(GTK_NOTEBOOK(notebook), cpu_tab, cpu_label);
 
-    // Set up a timer to update core labels every half second
-    g_timeout_add(500, (GSourceFunc)update_core_labels, core_data);
+    // Create a thread to update CPU information
+    pthread_t thread;
+    pthread_create(&thread, NULL, update_cpu_info, NULL);
+
+    // Create a timer to update the GUI periodically
+    g_timeout_add_seconds(1, update_gui, NULL);
 }
