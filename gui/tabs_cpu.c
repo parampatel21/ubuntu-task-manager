@@ -1,3 +1,4 @@
+#include "tabs_cpu.h"
 #include <gtk/gtk.h>
 #include <stdio.h>
 #include <string.h>
@@ -10,7 +11,6 @@
 GtkWidget *drawing_area;
 gdouble thread_usage[MAX_THREADS][HISTORY_SIZE] = {0};
 gint current_second = 0;
-
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
 gboolean update_data(gpointer user_data) {
@@ -58,7 +58,7 @@ static gboolean on_draw(GtkWidget *widget, cairo_t *cr, gpointer user_data) {
     gdouble x_scale = (gdouble)width / HISTORY_SIZE;
     gdouble y_scale = (gdouble)height / 100.0;
 
-    cairo_set_source_rgb(cr, 0.0, 0.0, 1.0);  // Blue color
+    cairo_set_source_rgb(cr, 0.0, 0.0, 1.0);
     cairo_set_line_width(cr, 2.0);
 
     for (int thread = 0; thread < MAX_THREADS; ++thread) {
@@ -79,23 +79,15 @@ static gboolean on_draw(GtkWidget *widget, cairo_t *cr, gpointer user_data) {
     return FALSE;
 }
 
-int main(int argc, char *argv[]) {
-    gtk_init(&argc, &argv);
-
-    GtkWidget *window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-    gtk_window_set_title(GTK_WINDOW(window), "CPU Thread Monitor");
-    gtk_window_set_default_size(GTK_WINDOW(window), 800, 600);
-    g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
+void add_cpu_tab(GtkWidget *notebook) {
+    GtkWidget *cpu_label = gtk_label_new("CPU");
+    GtkWidget *cpu_tab = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
 
     drawing_area = gtk_drawing_area_new();
-    gtk_container_add(GTK_CONTAINER(window), drawing_area);
-    g_signal_connect(drawing_area, "draw", G_CALLBACK(on_draw), NULL);
+    gtk_widget_set_size_request(drawing_area, 400, 300);
+    gtk_container_add(GTK_CONTAINER(cpu_tab), drawing_area);
 
-    gtk_widget_show_all(window);
+    gtk_notebook_append_page(GTK_NOTEBOOK(notebook), cpu_tab, cpu_label);
 
     g_timeout_add(UPDATE_INTERVAL, update_data, NULL);
-
-    gtk_main();
-
-    return 0;
 }
