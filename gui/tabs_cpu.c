@@ -5,6 +5,7 @@
 #define MAX_CORES 16
 
 GtkWidget *cpu_labels[MAX_CORES];
+unsigned long long prev_cpu_values[MAX_CORES][4];
 
 // Function to read CPU usage from /proc/stat
 void read_cpu_usage(double cpu_usage[MAX_CORES]) {
@@ -24,12 +25,19 @@ void read_cpu_usage(double cpu_usage[MAX_CORES]) {
                 sscanf(line + 3, "%llu %llu %llu %llu", &user, &nice, &sys, &idle);
 
                 unsigned long long total = user + nice + sys + idle;
-                unsigned long long diff_total = total - cpu_usage[core];
+                unsigned long long prev_total = prev_cpu_values[core][0] +
+                                                prev_cpu_values[core][1] +
+                                                prev_cpu_values[core][2] +
+                                                prev_cpu_values[core][3];
+
+                unsigned long long diff_total = total - prev_total;
 
                 if (diff_total > 0) {
-                    double usage = ((double)(total - idle - cpu_usage[core]) / diff_total) * 100.0;
-                    cpu_usage[core] = total - idle;
-                    g_print("Core %d Usage: %.2f%%\n", core, usage);
+                    double usage = ((double)(total - idle - prev_total) / diff_total) * 100.0;
+                    prev_cpu_values[core][0] = user;
+                    prev_cpu_values[core][1] = nice;
+                    prev_cpu_values[core][2] = sys;
+                    prev_cpu_values[core][3] = idle;
 
                     // Update the label text
                     char label_text[50];
