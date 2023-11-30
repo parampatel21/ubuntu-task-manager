@@ -1,70 +1,77 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <string.h>
+#include "tabs_cpu.h"
 #include <gtk/gtk.h>
 
-// Global variables for GTK
-GtkWidget *cpu_text_view;
-GtkTextBuffer *cpu_text_buffer;
+int core_count = 0;
 
-void update_cpu_tab() {
-    FILE *fp;
-    char path[1035];
+double *cpu_usage = NULL;
 
-    // Run the mpstat -P ALL command and capture the output
-    fp = popen("mpstat -P ALL 1 1", "r");
-    if (fp == NULL) {
-        printf("Error opening pipe!\n");
+void update_cpu_usage() {
+    FILE *mpstat_pipe = popen("mpstat -P ALL 1 1 | tail -n +4 | awk '{print 100 - $NF}'", "r");
+    if (mpstat_pipe == NULL) {
+        g_print("Error opening pipe!\n");
         return;
     }
 
-    // Clear the existing text in the text view
-    gtk_text_buffer_set_text(cpu_text_buffer, "", -1);
+    fscanf(mpstat_pipe, "%lf", &cpu_usage[0]);
 
-    // Read the output line by line
-    while (fgets(path, sizeof(path)-1, fp) != NULL) {
-        // Look for lines starting with "Average:"
-        if (strstr(path, "Average:") != NULL) {
-            int core;
-            float usage;
+    for (int i = 1; i <= core_count; i++) {
+        fscanf(mpstat_pipe, "%lf", &cpu_usage[i]);
+    }
 
-            // Parse the output to retrieve core number and usage
-            sscanf(path, "Average: %d %*s %*s %*s %*s %*s %*s %*s %*s %*s %f", &core, &usage);
+    pclose(mpstat_pipe);
+}
 
-            // Append the result to the text buffer
-            char buffer[50];
-            sprintf(buffer, "Core %d: %.2f%%\n", core, usage);
-            gtk_text_buffer_insert_at_cursor(cpu_text_buffer, buffer, -1);
+gboolean draw_cpu_graph(GtkWidget *widget, cairo_t *cr, gpointer user_data) {
+    int width, height;
+    gtk_widget_get_size_request(widget, &width, &height);
+
+    cairo_set_source_rgb(cr, 1, 1, 1);  // White color
+    cairo_paint(cr);
+
+    cairo_set_source_rgb(cr, 0, 0, 0);  // Black color
+
+    cairo_set_line_width(cr, 2.0);
+    for (int i = 0; i <= core_count; i++) {
+        double x = (double)i / core_count * width;
+        double y = height - cpu_usage[i] * height / 100.0;
+        if (i == 0) {
+            cairo_move_to(cr, x, y);
+        } else {
+            cairo_line_to(cr, x, y);
         }
     }
 
-    // Close the pipe
-    pclose(fp);
+    cairo_stroke(cr);
+
+    return FALSE;
+}
+
+gboolean update_cpu_data(gpointer user_data) {
+    update_cpu_usage();
+
+    GtkWidget *drawing_area = GTK_WIDGET(user_data);
+    gtk_widget_queue_draw(drawing_area);
+
+    return TRUE;
 }
 
 void add_cpu_tab(GtkWidget *notebook) {
     GtkWidget *cpu_label = gtk_label_new("CPU");
+    GtkWidget *grid = gtk_grid_new();
+    gtk_grid_set_row_homogeneous(GTK_GRID(grid), TRUE);
 
-    // Create a scrolled window to contain the text view
-    GtkWidget *scrolled_window = gtk_scrolled_window_new(NULL, NULL);
-    gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolled_window),
-                                   GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
+    core_count = atoi(popen("nproc --all", "r"));
 
-    // Create a text view and add it to the scrolled window
-    cpu_text_view = gtk_text_view_new();
-    gtk_text_view_set_editable(GTK_TEXT_VIEW(cpu_text_view), FALSE);
-    gtk_container_add(GTK_CONTAINER(scrolled_window), cpu_text_view);
+    cpu_usage = g_malloc((core_count + 1) * sizeof(double));
 
-    // Get the text buffer associated with the text view
-    cpu_text_buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(cpu_text_view));
+    GtkWidget *drawing_area = gtk_drawing_area_new();
+    gtk_widget_set_size_request(drawing_area, 400, 200);
+    g_signal_connect(G_OBJECT(drawing_area), "draw", G_CALLBACK(draw_cpu_graph), NULL);
+    gtk_grid_attach(GTK_GRID(grid), drawing_area, 0, 0, 1, 1);
 
-    // Create the CPU tab
-    GtkWidget *cpu_tab = scrolled_window;
+    gtk_notebook_append_page(GTK_NOTEBOOK(notebook), grid, cpu_label);
 
-    // Append the CPU tab to the notebook
-    gtk_notebook_append_page(GTK_NOTEBOOK(notebook), cpu_tab, cpu_label);
+    update_cpu_usage();
 
-    // Update the CPU tab content every second
-    g_timeout_add_seconds(1, (GSourceFunc)update_cpu_tab, NULL);
+    g_timeout_add_seconds(1, update_cpu_data, drawing_area);
 }
