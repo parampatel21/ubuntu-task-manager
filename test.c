@@ -1,6 +1,4 @@
 #include <gtk/gtk.h>
-#define BUF_MAX 1024
-#define MAX_CPU 128
 
 // Structure to hold data for the line chart
 typedef struct {
@@ -78,94 +76,41 @@ gboolean on_draw(GtkWidget *widget, cairo_t *cr, gpointer user_data) {
     return FALSE;
 }
 
-int read_fields (FILE *fp, unsigned long long int *fields)
-{
-  int retval;
-  char buffer[BUF_MAX];
-
-
-  if (!fgets (buffer, BUF_MAX, fp))
-  { perror ("Error"); }
-  /* line starts with c and a string. This is to handle cpu, cpu[0-9]+ */
-  retval = sscanf (buffer, "c%*s %Lu %Lu %Lu %Lu %Lu %Lu %Lu %Lu %Lu %Lu",
-                            &fields[0],
-                            &fields[1],
-                            &fields[2],
-                            &fields[3],
-                            &fields[4],
-                            &fields[5],
-                            &fields[6],
-                            &fields[7],
-                            &fields[8],
-                            &fields[9]);
-  if (retval == 0)
-  { return -1; }
-  if (retval < 4) /* Atleast 4 fields is to be read */
-  {
-    fprintf (stderr, "Error reading /proc/stat cpu field\n");
-    return 0;
-  }
-  return 1;
-}
-
+// Function to update data every second (for testing purposes)
 gboolean update_data(gpointer user_data) {
     AppData *data = (AppData *)user_data;
 
-    // Read data from /proc/stat
-    FILE *fp = fopen("/proc/stat", "r");
-    if (fp == NULL) {
-        perror("Error opening /proc/stat");
-        return TRUE; // Continue the timer
-    }
+    char str[100];
+    const char d[2] = " ";
+    char* token;
+    int i = 0,times,lag;
+    long int sum = 0, idle, lastSum = 0,lastIdle = 0;
+    long double idleFraction;
 
-    unsigned long long int fields[10], total_tick[MAX_CPU], total_tick_old[MAX_CPU], idle[MAX_CPU], idle_old[MAX_CPU], del_total_tick[MAX_CPU], del_idle[MAX_CPU];
-    int cpus = 0, count;
-    double percent_usage;
-
-    while (read_fields(fp, fields) != -1) {
-        for (int i = 0; i < 10; i++) {
-            total_tick[cpus] += fields[i];
-        }
-        idle[cpus] = fields[3];
-        cpus++;
-    }
-
-    fseek(fp, 0, SEEK_SET);
-    fflush(fp);
-
-    for (count = 0; count < cpus; count++) {
-        unsigned long long int total = 0; // Initialize total
-        total_tick_old[count] = total_tick[count];
-        idle_old[count] = idle[count];
-
-        if (!read_fields(fp, fields)) {
-            fclose(fp);
-            return TRUE; // Continue the timer
-        }
-
-        for (int i = 0; i < 10; i++) {
-            total += fields[i];
-        }
-        total_tick[count] = total;
-        idle[count] = fields[3];
-
-        del_total_tick[count] = total_tick[count] - total_tick_old[count];
-        del_idle[count] = idle[count] - idle_old[count];
-
-        percent_usage = ((del_total_tick[count] - del_idle[count]) / (double)del_total_tick[count]) * 100;
-        if (count == 0) {
-            printf("Total CPU Usage: %3.2lf%%\n", percent_usage);
-        } else {
-            printf("\tCPU%d Usage: %3.2lf%%\n", count - 1, percent_usage);
-        }
-
-        // Update the chart with the new value
-        update_chart(data, percent_usage);
-        fclose(fp);
-        return TRUE;
-    }
-
+    FILE* fp = fopen("/proc/stat","r");
+    i = 0;
+    fgets(str,100,fp);
     fclose(fp);
+    token = strtok(str,d);
+    sum = 0;
+    while(token!=NULL){
+        token = strtok(NULL,d);
+        if(token!=NULL){
+            sum += atoi(token);
+
+            if(i==3)
+                idle = atoi(token);
+
+            i++;
+        }
+    }
+    idleFraction = 100 - (idle-lastIdle)*100.0/(sum-lastSum);
+
+    lastIdle = idle;
+    lastSum = sum;
+
+    // Update the chart with the new value
+    update_chart(data, idleFraction);
 
     return TRUE; // Continue the timer
 }
@@ -202,4 +147,3 @@ int main(int argc, char *argv[]) {
 
     return 0;
 }
-
