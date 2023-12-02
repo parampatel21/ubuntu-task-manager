@@ -6,18 +6,31 @@
 
 
 
-void apply_css_to_widget(GtkWidget *widget);
 
-void apply_css_to_widget(GtkWidget *widget) {
+void apply_css_to_widget() {
     GtkCssProvider *provider = gtk_css_provider_new();
-    gtk_css_provider_load_from_data(provider,
-        "progressbar#used_memory_bar { background-color: red; } "
-        "progressbar#available_memory_bar { background-color: blue; } ", -1, NULL);
+    const char *css_style = 
+        "progressbar#used_memory_bar {"
+        "   background: red;"
+        "   border-radius: 0px;"
+        "   border-style: none;"
+        "}"
+        "progressbar#available_memory_bar {"
+        "   background: blue;"
+        "   border-radius: 0px;"
+        "   border-style: none;"
+        "}"
+        "progressbar.vertical trough {"
+        "   min-width: 20px;"
+        "}"
+        "progressbar.horizontal trough {"
+        "   min-height: 20px;"
+        "}";
+    gtk_css_provider_load_from_data(provider, css_style, -1, NULL);
 
-    GtkStyleContext *context = gtk_widget_get_style_context(widget);
-    gtk_style_context_add_provider(context,
-                                   GTK_STYLE_PROVIDER(provider),
-                                   GTK_STYLE_PROVIDER_PRIORITY_USER);
+    gtk_style_context_add_provider_for_screen(gdk_screen_get_default(),
+                                              GTK_STYLE_PROVIDER(provider),
+                                              GTK_STYLE_PROVIDER_PRIORITY_USER);
     g_object_unref(provider);
 }
 
@@ -25,8 +38,7 @@ void apply_css_to_widget(GtkWidget *widget) {
 int main(int argc, char *argv[]) {
     gtk_init(&argc, &argv);
 
-    setup_css_provider();
-
+    apply_css_to_widget();
 
     GtkWidget *window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
     gtk_window_set_default_size(GTK_WINDOW(window), 1000, 1000);
@@ -47,3 +59,5 @@ int main(int argc, char *argv[]) {
 
     return 0;
 }
+
+
