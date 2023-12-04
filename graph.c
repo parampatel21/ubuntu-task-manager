@@ -54,34 +54,33 @@ gboolean on_draw(GtkWidget *widget, cairo_t *cr, gpointer user_data) {
     // Calculate the spacing between data points
     double spacing = (double)width / MAX_DATA_POINTS;
 
-// Set color to black for axes
-cairo_set_source_rgb(cr, 0, 0, 0);
+    // Set color to black for axes
+    cairo_set_source_rgb(cr, 0, 0, 0);
 
-// Draw the axes
-cairo_move_to(cr, padding, padding);
-cairo_line_to(cr, padding, height + padding);
-cairo_line_to(cr, width + padding, height + padding);
-cairo_stroke(cr);
+    // Draw the axes
+    cairo_move_to(cr, padding, padding);
+    cairo_line_to(cr, padding, height + padding);
+    cairo_line_to(cr, width + padding, height + padding);
+    cairo_stroke(cr);
 
-// Draw the line chart for overall CPU and each core
-for (int cpu = 0; cpu <= data->cpu_count; ++cpu) {
-    // Set the color for the current CPU
-    cairo_set_source_rgb(cr, data->colors[cpu][0], data->colors[cpu][1], data->colors[cpu][2]);
+    // Draw the line chart for overall CPU and each core
+    for (int cpu = 0; cpu < data->cpu_count; ++cpu) {
+        // Set the color for the current CPU
+        cairo_set_source_rgb(cr, data->colors[cpu][0], data->colors[cpu][1], data->colors[cpu][2]);
 
-    // Map the first data point to the graph's scale
-    cairo_move_to(cr, padding, height + padding - (data->data[cpu][0] / 100.0) * height);
-    for (int i = 1; i < MAX_DATA_POINTS; ++i) {
-        // Map each subsequent data point to the graph's scale
-        cairo_line_to(cr, i * spacing + padding, height + padding - (data->data[cpu][i] / 100.0) * height);
+        // Map the first data point to the graph's scale
+        cairo_move_to(cr, padding, height + padding - (data->data[cpu][0] / 100.0) * height);
+        for (int i = 1; i < MAX_DATA_POINTS; ++i) {
+            // Map each subsequent data point to the graph's scale
+            cairo_line_to(cr, i * spacing + padding, height + padding - (data->data[cpu][i] / 100.0) * height);
+        }
+
+        // Stroke the path
+        cairo_stroke(cr);
     }
 
-    // Stroke the path
-    cairo_stroke(cr);
-}
-
-// Set color to black for axis labels
-cairo_set_source_rgb(cr, 0, 0, 0);
-
+    // Set color to black for axis labels
+    cairo_set_source_rgb(cr, 0, 0, 0);
 
     // Draw x-axis and y-axis labels
     cairo_select_font_face(cr, "Sans", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
@@ -109,7 +108,7 @@ cairo_set_source_rgb(cr, 0, 0, 0);
     int key_x = padding;
     int key_y = height + 2 * padding + 20;
     int row = 0;
-    for (int cpu = 0; cpu <= data->cpu_count; ++cpu) {
+    for (int cpu = 0; cpu < data->cpu_count; ++cpu) {
         cairo_set_source_rgb(cr, data->colors[cpu][0], data->colors[cpu][1], data->colors[cpu][2]);
 
         // Draw a small line as a color indicator
@@ -119,11 +118,7 @@ cairo_set_source_rgb(cr, 0, 0, 0);
 
         // Draw the label text
         char key_label[20];
-        if (cpu == 0) {
-            snprintf(key_label, sizeof(key_label), "Overall CPU");
-        } else {
-            snprintf(key_label, sizeof(key_label), "CPU%d", cpu - 1);
-        }
+        snprintf(key_label, sizeof(key_label), "CPU%d", cpu);
         cairo_move_to(cr, key_x + 25, key_y + 4);
         cairo_show_text(cr, key_label);
 
@@ -138,7 +133,6 @@ cairo_set_source_rgb(cr, 0, 0, 0);
 
     return FALSE;
 }
-
 
 int read_fields(FILE *fp, unsigned long long int *fields) {
     char buffer[BUF_MAX];
@@ -163,7 +157,7 @@ gboolean update_data(gpointer user_data) {
         return TRUE;
     }
 
-    // Skip the first line (total CPU usage)
+    // Read the first line (total CPU usage)
     char buffer[BUF_MAX];
     if (!fgets(buffer, BUF_MAX, fp)) {
         perror("Error reading /proc/stat");
@@ -172,11 +166,13 @@ gboolean update_data(gpointer user_data) {
     }
 
     for (int cpu = 0; cpu < data->cpu_count; ++cpu) {
+        // Read the current CPU data
         if (read_fields(fp, fields) < 4) {
             fprintf(stderr, "Error reading CPU %d data\n", cpu);
             continue;
         }
 
+        // Calculate CPU usage
         total_tick = 0;
         for (int i = 0; i < 10; i++) {
             total_tick += fields[i];
@@ -186,16 +182,19 @@ gboolean update_data(gpointer user_data) {
         static unsigned long long int total_tick_old[MAX_CPU] = {0};
         static unsigned long long int idle_old[MAX_CPU] = {0};
 
-        if (total_tick_old[cpu] != 0) {
-            del_total_tick = total_tick - total_tick_old[cpu];
-            del_idle = idle - idle_old[cpu];
+        del_total_tick = total_tick - total_tick_old[cpu];
+        del_idle = idle - idle_old[cpu];
 
+        if (del_total_tick > 0) {
             percent_usage = ((del_total_tick - del_idle) / (double)del_total_tick) * 100;
-            printf("CPU%d Usage: %3.2lf%%\n", cpu, percent_usage);
-
-            // Update the chart with the new value
-            update_chart(data, cpu, percent_usage);
+        } else {
+            percent_usage = 0.0;
         }
+
+        printf("CPU%d Usage: %3.2lf%%\n", cpu, percent_usage);
+
+        // Update the chart with the new value
+        update_chart(data, cpu, percent_usage);
 
         total_tick_old[cpu] = total_tick;
         idle_old[cpu] = idle;
@@ -226,7 +225,7 @@ int main(int argc, char *argv[]) {
 
     // Assign colors
     data.colors[0][0] = 1.0; data.colors[0][1] = 0.0; data.colors[0][2] = 0.0; // Red for Overall CPU
-    for (int cpu = 1; cpu <= data.cpu_count; ++cpu) {
+    for (int cpu = 1; cpu < data.cpu_count; ++cpu) {
         if (cpu == 1) {
             data.colors[cpu][0] = 0.0; data.colors[cpu][1] = 1.0; data.colors[cpu][2] = 0.0; // Green for CPU0
         } else {
