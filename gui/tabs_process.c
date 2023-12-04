@@ -1,6 +1,3 @@
-//
-// Created by Param Patel on 11/22/23.
-//
 
 #include "tabs_process.h"
 #include <gtk/gtk.h>
@@ -10,9 +7,10 @@
 #include <unistd.h>
 #include <signal.h>
 
-// Function declarations for process actions
+
 void stop_process(GtkWidget *widget, GtkListStore *store);
 void continue_process(GtkWidget *widget, GtkListStore *store);
+void display_open_files_dialog(GtkListStore *store);
 void kill_process(GtkWidget *widget, GtkListStore *store);
 void list_memory_maps(GtkWidget *widget, GtkListStore *store);
 void list_open_files(GtkWidget *widget, GtkListStore *store);
@@ -24,11 +22,12 @@ void all_processes_list_clicked(GtkWidget *widget, GtkListStore *store);
 void user_processes_tree_clicked(GtkWidget *widget, GtkListStore *store);
 void user_processes_list_clicked(GtkWidget *widget, GtkListStore *store);
 void refresh_clicked(GtkWidget *widget, GtkListStore *store);
+void add_proc_column(GtkWidget *text_view, const char *title, int column_id);
 gboolean show_context_menu(GtkWidget *text_view, GdkEventButton *event, GtkWidget *menu);
 int get_cursor_line(GtkWidget *widget);
 pid_t get_pid_from_model(GtkListStore *store);
 
-// Structure to save process information
+
 struct ProcessInfo {
     char user[13];
     int pid;
@@ -44,7 +43,7 @@ struct ProcessInfo {
     char status[11];
 };
 
-// Useful enumerations
+
 
 enum g_commands {
     STOP,
@@ -61,14 +60,14 @@ enum g_context {
     USERPROCESS_TREE
 };
 
-// Global variables
-int g_current_row = -1;   // Selected row in the buffer
+
+int g_current_row = -1;
 int g_current_context = ALLPROCESS;
 
 // Function to get process information based on a specific command and update text buffer
 void getProcessInfoAndUpdateBuffer(const char *command, GtkListStore *store, GtkWidget *widget) {
 
-    // Use popen to get process information and write it to the text buffer
+  
     FILE *fp = popen(command, "r");
     if (fp == NULL) {
         return;
@@ -119,7 +118,7 @@ void getProcessInfoAndUpdateBuffer(const char *command, GtkListStore *store, Gtk
 
     pclose(fp);
     gtk_widget_show_all(widget);
-} /* getProcessInfoAndUpdateBuffer() */
+} 
 
 
 // Updates state of a process in the process array and refreshes
@@ -127,13 +126,10 @@ void update_process_info(int c_command, int l_pid, GtkWidget *widget, GtkListSto
     GtkTreeIter iter;
     gboolean valid;
 
-    // Start iterating from the beginning of the list store
-    // to locate the process in the store
     valid = gtk_tree_model_get_iter_first(GTK_TREE_MODEL(store), &iter);
     while (valid) {
         gint pid;
 
-        // Retrieve values from the current row using gtk_tree_model_get
         gtk_tree_model_get(GTK_TREE_MODEL(store), &iter, 1, &pid, -1);
 
         if (pid == l_pid) {
@@ -160,8 +156,7 @@ void update_process_info(int c_command, int l_pid, GtkWidget *widget, GtkListSto
         valid = gtk_tree_model_iter_next(GTK_TREE_MODEL(store), &iter);
     }
     gtk_widget_show_all(widget);
-} /* update_process_info() */
-
+} 
 
 // Fetch process_id from the model
 pid_t get_pid_from_model(GtkListStore *store) {
@@ -171,11 +166,9 @@ pid_t get_pid_from_model(GtkListStore *store) {
     int row_index = 0;
     int found = 0;
 
-    // Start iterating from the beginning of the list store
-    // to locate the process in the store
     valid = gtk_tree_model_get_iter_first(GTK_TREE_MODEL(store), &iter);
     while (valid) {
-        // Retrieve values from the current row using gtk_tree_model_get
+     
         gtk_tree_model_get(GTK_TREE_MODEL(store), &iter, 1, &pid, -1);
         if (row_index == g_current_row) {
             found = 1;
@@ -190,7 +183,7 @@ pid_t get_pid_from_model(GtkListStore *store) {
     else {
         return -1;
     }
-} /* get_pid_from_model() */
+} 
 
 
 // Function to stop a process using GTK
@@ -205,7 +198,7 @@ void stop_process(GtkWidget *widget, GtkListStore *store) {
     else {
         perror("Error stopping process");
     }
-} /* stop_process() */
+} 
 
 
 // Function to continue a process using GTK
@@ -220,8 +213,7 @@ void continue_process(GtkWidget *widget, GtkListStore *store) {
     else {
         perror("Error continuing process");
     }
-} /* continue_process() */
-
+} 
 
 // Function to kill a process using GTK
 void kill_process(GtkWidget *widget, GtkListStore *store) {
@@ -234,7 +226,7 @@ void kill_process(GtkWidget *widget, GtkListStore *store) {
     else {
         perror("Error killing process");
     }
-} /* kill_process() */
+} 
 
 
 // Function to list memory maps of a process using GTK
@@ -248,21 +240,195 @@ void list_memory_maps(GtkWidget *widget, GtkListStore *store) {
 
     printf("Memory maps of process with PID %d:\n", pid);
     // system(command); // Execute the command to list memory maps
-} /* list_memory_maps() */
+}
 
 
 // Function to list open files of a process using GTK
-void list_open_files(GtkWidget *widget, GtkListStore *store) {
+void old_list_open_files(GtkWidget *widget, GtkListStore *store) {
 
     pid_t pid = get_pid_from_model(store);
 
     char command[50];
     sprintf(command, "lsof -p %d", pid); // Using the 'lsof' command to list open files
 
-    printf("Open files of process with PID %d:\n", pid);
-    updateProcessInfo(command, store, widget);
+    // printf("Open files of process with PID %d:\n", pid);
+    // updateProcessInfo(command, store, widget);
+
     // system(command); // Execute the command to list open files
-} /* list_open_files() */
+     FILE *fp = popen(command, "r");
+    if (fp == NULL) {
+        perror("Failed to run command");
+        return;
+    }
+
+    GtkListStore *open_files_store = gtk_list_store_new(3, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
+    char line[1024];
+    char fd[10], type[10], object[256];
+
+    // Read the output a line at a time
+    while (fgets(line, sizeof(line), fp) != NULL) {
+        sscanf(line, "%*s %s %s %*s %*s %*s %*s %*s %s", fd, type, object);
+        printf("FD: %s   Type: %s  Obj: %s\n", fd, type, object);
+
+        // Insert into the list store
+        gtk_list_store_insert_with_values(open_files_store, NULL, -1, 0, fd, 1, type, 2, object, -1);
+    }
+
+    pclose(fp);
+
+    /*
+    gboolean valid;
+    GtkTreeIter iter;
+    int count = 0;
+    valid = gtk_tree_model_get_iter_first(GTK_TREE_MODEL(store), &iter);
+    while (valid) {
+        // Retrieve values from the current row using gtk_tree_model_get
+        gtk_tree_model_get(GTK_TREE_MODEL(open_files_store), &iter, 1, type, -1);
+        printf("Type: %s\n", type);
+        valid = gtk_tree_model_iter_next(GTK_TREE_MODEL(store), &iter);
+        count++;
+    }
+    printf("Count: %d\n", count);
+    */
+
+    display_open_files_dialog(open_files_store);
+} 
+
+
+void list_open_files(GtkWidget *widget, GtkListStore *store) {
+    pid_t pid = get_pid_from_model(store);
+    if (pid == -1) {
+        // Handle error: no PID found
+        g_print("No process selected.\n");
+        return;
+    }
+
+    char command[256];
+    sprintf(command, "lsof -p %d", pid);
+
+    FILE *fp = popen(command, "r");
+    if (fp == NULL) {
+        perror("Failed to run command");
+        return;
+    }
+
+    GtkListStore *open_files_store = gtk_list_store_new(3, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
+    gboolean header_skipped = FALSE;
+    char line[1024];
+
+    if (fgets(line, sizeof(line), fp) != NULL) {
+        header_skipped = TRUE;
+    }
+
+    while (fgets(line, sizeof(line), fp) != NULL) {
+        /*
+        char *fd = strtok(line, " \t");
+        char *type = strtok(NULL, " \t");
+        char *object = strtok(NULL, "\n");  // Adjust based on the actual column of the object
+        */
+        char fd[10], type[10], object[256];
+
+        sscanf(line, "%*s %*d %*s %s %s %*s %*d %*d %s", fd, type, object);
+
+        if (fd && type && object) {
+            gtk_list_store_insert_with_values(open_files_store, NULL, -1,
+                                              0, fd,
+                                              1, type,
+                                              2, object,
+                                              -1);
+        }
+    }
+
+    pclose(fp);
+    display_open_files_dialog(open_files_store);
+}
+
+
+
+void display_open_files_dialog(GtkListStore *store) {
+    GtkWidget *dialog, *scrolled_window, *tree_view;
+    GtkCellRenderer *renderer;
+    GtkTreeViewColumn *column;
+
+
+    dialog = gtk_dialog_new_with_buttons("Open Files",
+                                         NULL,
+                                         GTK_DIALOG_MODAL,
+                                         "_Close",
+                                         GTK_RESPONSE_CLOSE,
+                                         NULL);
+
+    gtk_window_set_default_size(GTK_WINDOW(dialog), 500, 500);
+
+   
+    scrolled_window = gtk_scrolled_window_new(NULL, NULL);
+    gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
+                       scrolled_window, TRUE, TRUE, 0);
+
+    tree_view = gtk_tree_view_new_with_model(GTK_TREE_MODEL(store));
+
+  
+    renderer = gtk_cell_renderer_text_new();
+    column = gtk_tree_view_column_new_with_attributes("FD", renderer, "text", 0, NULL);
+    gtk_tree_view_append_column(GTK_TREE_VIEW(tree_view), column);
+
+    column = gtk_tree_view_column_new_with_attributes("Type", renderer, "text", 1, NULL);
+    gtk_tree_view_append_column(GTK_TREE_VIEW(tree_view), column);
+
+    column = gtk_tree_view_column_new_with_attributes("Object", renderer, "text", 2, NULL);
+    gtk_tree_view_append_column(GTK_TREE_VIEW(tree_view), column);
+
+    gtk_container_add(GTK_CONTAINER(scrolled_window), tree_view);
+
+  
+    gtk_widget_show_all(dialog);
+
+   
+    gtk_dialog_run(GTK_DIALOG(dialog));
+
+    
+    gtk_widget_destroy(dialog);
+}
+
+
+// Function to display open files in a dialog
+void old_display_open_files_dialog(GtkListStore *store) {
+    GtkWidget *dialog, *scrolled_window, *tree_view;
+    GtkCellRenderer *renderer;
+    GtkTreeViewColumn *column;
+
+    dialog = gtk_dialog_new_with_buttons("Open Files", NULL, GTK_DIALOG_MODAL, "_Close", GTK_RESPONSE_CLOSE, NULL);
+    gtk_window_set_default_size(GTK_WINDOW(dialog), 400, 300);
+
+    scrolled_window = gtk_scrolled_window_new(NULL, NULL);
+    gtk_container_add(GTK_CONTAINER(gtk_dialog_get_content_area(GTK_DIALOG(dialog))), scrolled_window);
+
+    tree_view = gtk_tree_view_new_with_model(GTK_TREE_MODEL(store));
+    renderer = gtk_cell_renderer_text_new();
+
+    // Add columns to the tree view
+    /*
+    column = gtk_tree_view_column_new_with_attributes("FD", renderer, "text", 0, NULL);
+    gtk_tree_view_append_column(GTK_TREE_VIEW(tree_view), column);
+    column = gtk_tree_view_column_new_with_attributes("Type", renderer, "text", 1, NULL);
+    gtk_tree_view_append_column(GTK_TREE_VIEW(tree_view), column);
+    column = gtk_tree_view_column_new_with_attributes("Object", renderer, "text", 2, NULL);
+    gtk_tree_view_append_column(GTK_TREE_VIEW(tree_view), column);
+    */
+
+    add_proc_column(tree_view, "FD", 0);
+    add_proc_column(tree_view, "Type", 0);
+    add_proc_column(tree_view, "Object", 0);
+
+    gtk_container_add(GTK_CONTAINER(scrolled_window), tree_view);
+    gtk_widget_show_all(dialog);
+
+    // Run the dialog and wait for a response
+    gtk_dialog_run(GTK_DIALOG(dialog));
+    gtk_widget_destroy(dialog);
+
+} 
+
 
 
 // Function to create a context menu for right-click on text view
@@ -296,7 +462,7 @@ void create_context_menu(GtkWidget *text_view, GtkListStore *store) {
     // Connect right-click event to show the context menu
     g_signal_connect(text_view, "button-press-event", G_CALLBACK(show_context_menu), menu);
 
-} /* create_context_menu() */
+} 
 
 
 // Function to handle right-click event and show context menu
@@ -328,14 +494,14 @@ gboolean show_context_menu(GtkWidget *text_view, GdkEventButton *event, GtkWidge
     }
     return FALSE;
 
-} /* show_context_menu() */
+} 
 
 
 // Function to update process information for all processes
 void updateProcessInfo(const char *command, GtkListStore *store, GtkWidget *widget) {
     getProcessInfoAndUpdateBuffer(command, store, widget);
 
-} /* updateProcessInfo() */
+} 
 
 
 // Callback for the Refresh button
@@ -354,7 +520,7 @@ void refresh_clicked(GtkWidget *widget, GtkListStore *store) {
             user_processes_tree_clicked(widget, store);
             break;
     }
-} /* refresh_clicked() */
+} 
 
 
 // Callback for displaying all processes in tree format
@@ -363,7 +529,7 @@ void all_processes_tree_clicked(GtkWidget *widget, GtkListStore *store) {
     updateProcessInfo("ps -e --forest", store, widget);
     g_current_context = ALLPROCESS_TREE;
 
-} /* all_processes_tree_clicked() */
+} 
 
 
 // Callback for displaying all processes in list format
@@ -372,7 +538,7 @@ void all_processes_list_clicked(GtkWidget *widget, GtkListStore *store) {
     updateProcessInfo("ps aux", store, widget);
     g_current_context = ALLPROCESS;
 
-} /* all_processes_list_clicked() */
+} 
 
 
 // Callback for displaying user-owned processes in tree format
@@ -381,7 +547,7 @@ void user_processes_tree_clicked(GtkWidget *widget, GtkListStore *store) {
     updateProcessInfo("ps -u --forest", store, widget);
     g_current_context = USERPROCESS_TREE;
 
-} /* user_processes_tree_clicked() */
+} 
 
 
 // Callback for displaying user-owned processes in list format
@@ -389,7 +555,7 @@ void user_processes_list_clicked(GtkWidget *widget, GtkListStore *store) {
     updateProcessInfo("ps -u", store, widget);
     g_current_context = USERPROCESS;
 
-} /* user_processes_list_clicked() */
+} 
 
 /*
  * Adds a text column to a tree view with a given title and associates it with a column in the model
@@ -401,7 +567,7 @@ void add_proc_column(GtkWidget *text_view, const char *title, int column_id) {
     gtk_tree_view_column_set_resizable(column, TRUE);
     gtk_tree_view_append_column(GTK_TREE_VIEW(text_view), column);
 
-} /* add_proc_column() */
+} 
 
 
 // Function to add process tab
@@ -456,4 +622,4 @@ void add_process_tab(GtkWidget *notebook) {
     refresh_clicked(text_view, store);
     gtk_widget_show_all(notebook);
 
-} /* add_process_tab() */
+} 
