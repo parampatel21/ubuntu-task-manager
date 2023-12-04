@@ -1,0 +1,7 @@
+
+network.c: In function ‘on_draw’:
+network.c:99:46: warning: ‘ KiB/s’ directive output truncated writing 6 bytes into a region of size between 0 and 3 [-Wformat-truncation=]
+   99 |         snprintf(label, sizeof(label), "%d KiB/s", i);
+      |                                           ~~~^~~
+network.c:99:9: note: ‘snprintf’ output between 8 and 18 bytes into a destination of size 4
+   99 |         snprintf(label, sizeof(label), "%d KiB/s", i);

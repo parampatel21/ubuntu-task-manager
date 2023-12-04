@@ -93,14 +93,15 @@ gboolean on_draw(GtkWidget *widget, cairo_t *cr, gpointer user_data) {
         cairo_show_text(cr, label);
     }
 
-    // Draw y-axis numbers
-    for (int i = 0; i <= 100; i += 10) {
-        double y = i * height / 100 + padding;
-        char label[4];
-        snprintf(label, sizeof(label), "%d%%", i);
-        cairo_move_to(cr, padding - 40, height + padding - y + 5);
-        cairo_show_text(cr, label);
-    }
+// Draw y-axis numbers
+for (int i = 0; i <= 100; i += 10) {
+    double y = height - i * height / 100 + padding;
+    char label[4];
+    snprintf(label, sizeof(label), "%d%%", i);
+    cairo_move_to(cr, padding - 40, y + 5);
+    cairo_show_text(cr, label);
+}
+
 
     // Draw the key for the memory and swap lines
     cairo_set_font_size(cr, 14.0);
