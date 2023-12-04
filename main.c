@@ -34,7 +34,6 @@ void apply_css_to_widget() {
     g_object_unref(provider);
 }
 
-
 int main(int argc, char *argv[]) {
     gtk_init(&argc, &argv);
 
@@ -47,8 +46,13 @@ int main(int argc, char *argv[]) {
     GtkWidget *notebook = gtk_notebook_new();
     gtk_container_add(GTK_CONTAINER(window), notebook);
 
-    // Add tabs
-    add_cpu_tab(notebook);
+    // Create an instance of AppData
+    AppData data = {0};
+
+    // Add CPU tab
+    add_cpu_tab(notebook, &data);
+
+    // Add other tabs (you can pass the same data structure)
     add_memory_tab(notebook);
     add_process_tab(notebook);
     add_system_tab(notebook);
@@ -59,5 +63,3 @@ int main(int argc, char *argv[]) {
 
     return 0;
 }
-
-
