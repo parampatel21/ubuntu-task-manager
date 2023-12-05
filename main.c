@@ -4,9 +4,6 @@
 #include "gui/tabs_process.h"
 #include "gui/tabs_system.h"
 
-
-
-
 void apply_css_to_widget() {
     GtkCssProvider *provider = gtk_css_provider_new();
     const char *css_style = 
@@ -46,13 +43,11 @@ int main(int argc, char *argv[]) {
     GtkWidget *notebook = gtk_notebook_new();
     gtk_container_add(GTK_CONTAINER(window), notebook);
 
-    // Create an instance of AppData
     AppData data = {0};
+    AppData2 data2;
 
-    // Add CPU tab
-    add_cpu_tab(notebook, &data);
+    add_cpu_tab(notebook, &data, &data2);
 
-    // Add other tabs (you can pass the same data structure)
     add_memory_tab(notebook);
     add_process_tab(notebook);
     add_system_tab(notebook);
