@@ -152,7 +152,7 @@ gboolean on_draw3(GtkWidget *widget, cairo_t *cr, gpointer user_data) {
     }
 
     for (int i = 0; i <= 20; i += 2) {
-        double y = (20 - i) * height / 20.0 + padding;  // Adjusted for 20 MiB/s max
+        double y = (20 - i) * height / 20.0 + padding;
         char label[15];
         snprintf(label, sizeof(label), "%d MiB/s", i);
 
@@ -222,7 +222,7 @@ int read_network_utilization(double *recv_speed, double *send_speed, double *las
     unsigned long long int dummy;
     char interface[16];
     while (fgets(line, sizeof(line), fp) != NULL) {
-        if (strstr(line, "eth0") != NULL) {  // Replace "eth0" with your interface name
+        if (strstr(line, "eth0") != NULL) {
             sscanf(line, "%s %llu %*d %*d %*d %*d %*d %*d %*d %llu %*d %*d %*d %*d %*d %*d %*d",
                    interface, &recv_bytes, &send_bytes);
             break;
@@ -533,7 +533,6 @@ int read_fields(FILE *fp, unsigned long long int *fields) {
         return TRUE;
     }
 
-    // Read the first line (total CPU usage)
     char buffer[BUF_MAX];
     if (!fgets(buffer, BUF_MAX, fp)) {
         perror("Error reading /proc/stat");
@@ -542,13 +541,11 @@ int read_fields(FILE *fp, unsigned long long int *fields) {
     }
 
     for (int cpu = 0; cpu < data->cpu_count; ++cpu) {
-        // Read the current CPU data
         if (read_fields(fp, fields) < 4) {
             fprintf(stderr, "Error reading CPU %d data\n", cpu);
             continue;
         }
 
-        // Calculate CPU usage
         total_tick = 0;
         for (int i = 0; i < 10; i++) {
             total_tick += fields[i];
@@ -567,9 +564,7 @@ int read_fields(FILE *fp, unsigned long long int *fields) {
             percent_usage = 0.0;
         }
 
-        // printf("CPU%d Usage: %3.2lf%%\n", cpu, percent_usage);
 
-        // Update the chart with the new value
         update_chart2(data, cpu, percent_usage);
 
         total_tick_old[cpu] = total_tick;
