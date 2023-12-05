@@ -46,7 +46,9 @@ int main(int argc, char *argv[]) {
     AppData data = {0};
     AppData2 data2;
 
-    add_cpu_tab(notebook, &data, &data2);
+    AppData3 data3 = {0};
+
+    add_cpu_tab(notebook, &data, &data2, &data3);
 
     add_memory_tab(notebook);
     add_process_tab(notebook);

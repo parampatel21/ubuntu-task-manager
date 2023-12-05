@@ -26,7 +26,16 @@ typedef struct {
     int cpu_count;
 } AppData2;
 
-void add_cpu_tab(GtkWidget *notebook, AppData *data, AppData2 *data2);
+typedef struct {
+    GtkWidget *drawing_area;
+    double data[2][MAX_DATA_POINTS]; // Data for network receiving and sending
+    double colors[2][3];             // Colors for network lines
+    int first_update;
+    float total_received;
+    float total_sent;
+} AppData3;
+
+void add_cpu_tab(GtkWidget *notebook, AppData *data, AppData2 *data2, AppData3 *data3);
 gboolean update_data(gpointer user_data);
 int read_memory_swap(double *memory, double *swap);
 gboolean on_draw(GtkWidget *widget, cairo_t *cr, gpointer user_data);
@@ -38,5 +47,13 @@ void update_chart2(AppData2 *data, int cpu_index, double new_value);
 gboolean on_draw2(GtkWidget *widget, cairo_t *cr, gpointer user_data);
 int read_fields(FILE *fp, unsigned long long int *fields);
 gboolean update_data2(gpointer user_data);
+
+void update_chart3(AppData3 *data, int index, double new_value);
+void init_network_utilization(double *last_recv, double *last_send);
+void update_total_received_sent(AppData3 *data);
+gboolean on_draw3(GtkWidget *widget, cairo_t *cr, gpointer user_data);
+int read_network_utilization(double *recv_speed, double *send_speed, double *last_recv, double *last_send);
+gboolean update_data3(gpointer user_data);
+void generate_random_color3(double *color);
 
 #endif
