@@ -11,7 +11,30 @@ void generate_random_color(double *color) {
     }
 }
 
-// Function to update the line chart with new data
+int get_memory_swap_info(double *total_memory, double *memory_used, double *total_swap, double *swap_used) {
+    FILE *fp = popen("free -m | awk 'NR==2{print $2} NR==2{print $3} NR==3{print $2} NR==3{print $3}'", "r");
+    if (fp == NULL) {
+        perror("Error opening pipe to free command");
+        return -1;
+    }
+
+    int read_count = fscanf(fp, "%lf\n%lf\n%lf\n%lf", total_memory, memory_used, total_swap, swap_used);
+    if (read_count != 4) {
+        perror("Error reading from free command");
+        pclose(fp);
+        return -1;
+    }
+
+    *total_memory /= 1024.0;  // Convert to GiB
+    *memory_used /= 1024.0;
+    *total_swap /= 1024.0;
+    *swap_used /= 1024.0;
+
+    pclose(fp);
+    return 0;
+}
+
+
 void update_chart(AppData *data, int index, double new_value) {
     // Shift existing data to the left
     memmove(data->data[index], data->data[index] + 1, sizeof(double) * (MAX_DATA_POINTS - 1));
@@ -21,18 +44,6 @@ void update_chart(AppData *data, int index, double new_value) {
 
     // Queue a redraw of the drawing area
     gtk_widget_queue_draw(data->drawing_area);
-
-    // Update the labels with memory and swap information
-    double memory_usage, swap_usage;
-    if (read_memory_swap(&memory_usage, &swap_usage) == 0) {
-        char memory_label[50], swap_label[50];
-        snprintf(memory_label, sizeof(memory_label), "Memory: %.1f GiB (%.1f%%) of %.1f GiB", 
-                 memory_usage / 1024.0, memory_usage, data->total_memory);
-        snprintf(swap_label, sizeof(swap_label), "Swap: %.1f GiB (%.1f%%) of %.1f GiB", 
-                 swap_usage / 1024.0, swap_usage, data->total_swap);
-        gtk_label_set_text(GTK_LABEL(data->memory_label), memory_label);
-        gtk_label_set_text(GTK_LABEL(data->swap_label), swap_label);
-    }
 }
 
 gboolean on_draw(GtkWidget *widget, cairo_t *cr, gpointer user_data) {
@@ -125,20 +136,42 @@ gboolean on_draw(GtkWidget *widget, cairo_t *cr, gpointer user_data) {
         key_x += 100;
     }
 
-    // Draw labels for memory and swap usage
-    cairo_set_font_size(cr, 12.0);
-    cairo_set_source_rgb(cr, 0, 0, 0);
+    // Draw the Memory and Swap labels horizontally inline
+    gchar *memory_label_text, *swap_label_text;
+    double memory_used, swap_used, total_memory, total_swap;
 
-    // Draw Memory label
-    cairo_move_to(cr, padding, height + 2 * padding + 50);
-    cairo_show_text(cr, gtk_label_get_text(GTK_LABEL(data->memory_label)));
+    if (get_memory_swap_info(&total_memory, &memory_used, &total_swap, &swap_used) == 0) {
+        double memory_percentage = (memory_used / total_memory) * 100;
+        double swap_percentage = (swap_used / total_swap) * 100;
 
-    // Draw Swap label
-    cairo_move_to(cr, padding, height + 2 * padding + 70);
-    cairo_show_text(cr, gtk_label_get_text(GTK_LABEL(data->swap_label)));
+        memory_label_text = g_strdup_printf("Memory: %.1lf GiB (%.1lf%%) of %.1lf GiB",
+                                            memory_used, memory_percentage, total_memory);
+        swap_label_text = g_strdup_printf("Swap: %.1lf GiB (%.1lf%%) of %.1lf GiB",
+                                          swap_used, swap_percentage, total_swap);
+
+        // Display Memory label
+        cairo_set_source_rgb(cr, 0, 0, 0);
+        cairo_move_to(cr, key_x, key_y + 4);
+        // cairo_show_text(cr, "Memory:");
+
+        cairo_show_text(cr, memory_label_text);
+
+        // Update key_x for the Swap label
+        key_x += 300; // Adjusted space between Memory and Swap
+
+        // Display Swap label
+        cairo_move_to(cr, key_x, key_y + 4);
+        // cairo_show_text(cr, "Swap:");
+
+        cairo_show_text(cr, swap_label_text);
+
+        g_free(memory_label_text);
+        g_free(swap_label_text);
+    }
 
     return FALSE;
 }
+
 
 
 
