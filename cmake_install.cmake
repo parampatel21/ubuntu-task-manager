@@ -1,4 +1,4 @@
-# Install script for directory: /homes/ptpatel/cs252/task_manager
+# Install script for directory: /homes/ptpatel/cs252/lab6
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -50,5 +50,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "/homes/ptpatel/cs252/task_manager/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "/homes/ptpatel/cs252/lab6/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")

@@ -8,11 +8,11 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
-  "/homes/ptpatel/cs252/task_manager/gui/tabs_cpu.c" "CMakeFiles/task_manager.dir/gui/tabs_cpu.c.o" "gcc" "CMakeFiles/task_manager.dir/gui/tabs_cpu.c.o.d"
-  "/homes/ptpatel/cs252/task_manager/gui/tabs_memory.c" "CMakeFiles/task_manager.dir/gui/tabs_memory.c.o" "gcc" "CMakeFiles/task_manager.dir/gui/tabs_memory.c.o.d"
-  "/homes/ptpatel/cs252/task_manager/gui/tabs_process.c" "CMakeFiles/task_manager.dir/gui/tabs_process.c.o" "gcc" "CMakeFiles/task_manager.dir/gui/tabs_process.c.o.d"
-  "/homes/ptpatel/cs252/task_manager/gui/tabs_system.c" "CMakeFiles/task_manager.dir/gui/tabs_system.c.o" "gcc" "CMakeFiles/task_manager.dir/gui/tabs_system.c.o.d"
-  "/homes/ptpatel/cs252/task_manager/main.c" "CMakeFiles/task_manager.dir/main.c.o" "gcc" "CMakeFiles/task_manager.dir/main.c.o.d"
+  "/homes/ptpatel/cs252/lab6/gui/tabs_cpu.c" "CMakeFiles/task_manager.dir/gui/tabs_cpu.c.o" "gcc" "CMakeFiles/task_manager.dir/gui/tabs_cpu.c.o.d"
+  "/homes/ptpatel/cs252/lab6/gui/tabs_memory.c" "CMakeFiles/task_manager.dir/gui/tabs_memory.c.o" "gcc" "CMakeFiles/task_manager.dir/gui/tabs_memory.c.o.d"
+  "/homes/ptpatel/cs252/lab6/gui/tabs_process.c" "CMakeFiles/task_manager.dir/gui/tabs_process.c.o" "gcc" "CMakeFiles/task_manager.dir/gui/tabs_process.c.o.d"
+  "/homes/ptpatel/cs252/lab6/gui/tabs_system.c" "CMakeFiles/task_manager.dir/gui/tabs_system.c.o" "gcc" "CMakeFiles/task_manager.dir/gui/tabs_system.c.o.d"
+  "/homes/ptpatel/cs252/lab6/main.c" "CMakeFiles/task_manager.dir/main.c.o" "gcc" "CMakeFiles/task_manager.dir/main.c.o.d"
   )
 
 # Targets to which this target links.

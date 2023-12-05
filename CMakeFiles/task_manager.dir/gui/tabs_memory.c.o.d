@@ -1,7 +1,6 @@
 CMakeFiles/task_manager.dir/gui/tabs_memory.c.o: \
- /homes/ptpatel/cs252/task_manager/gui/tabs_memory.c \
- /usr/include/stdc-predef.h \
- /homes/ptpatel/cs252/task_manager/gui/tabs_memory.h \
+ /homes/ptpatel/cs252/lab6/gui/tabs_memory.c /usr/include/stdc-predef.h \
+ /homes/ptpatel/cs252/lab6/gui/tabs_memory.h \
  /usr/include/gtk-3.0/gtk/gtk.h /usr/include/gtk-3.0/gdk/gdk.h \
  /usr/include/gtk-3.0/gdk/gdkconfig.h /usr/include/glib-2.0/glib.h \
  /usr/include/glib-2.0/glib/galloca.h /usr/include/glib-2.0/glib/gtypes.h \

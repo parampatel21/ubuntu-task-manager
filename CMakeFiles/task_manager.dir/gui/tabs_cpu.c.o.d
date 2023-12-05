@@ -1,10 +1,9 @@
 CMakeFiles/task_manager.dir/gui/tabs_cpu.c.o: \
- /homes/ptpatel/cs252/task_manager/gui/tabs_cpu.c \
- /usr/include/stdc-predef.h \
- /homes/ptpatel/cs252/task_manager/gui/tabs_cpu.h \
- /usr/include/gtk-3.0/gtk/gtk.h /usr/include/gtk-3.0/gdk/gdk.h \
- /usr/include/gtk-3.0/gdk/gdkconfig.h /usr/include/glib-2.0/glib.h \
- /usr/include/glib-2.0/glib/galloca.h /usr/include/glib-2.0/glib/gtypes.h \
+ /homes/ptpatel/cs252/lab6/gui/tabs_cpu.c /usr/include/stdc-predef.h \
+ /homes/ptpatel/cs252/lab6/gui/tabs_cpu.h /usr/include/gtk-3.0/gtk/gtk.h \
+ /usr/include/gtk-3.0/gdk/gdk.h /usr/include/gtk-3.0/gdk/gdkconfig.h \
+ /usr/include/glib-2.0/glib.h /usr/include/glib-2.0/glib/galloca.h \
+ /usr/include/glib-2.0/glib/gtypes.h \
  /usr/lib/x86_64-linux-gnu/glib-2.0/include/glibconfig.h \
  /usr/include/glib-2.0/glib/gmacros.h \
  /usr/lib/gcc/x86_64-linux-gnu/11/include/stddef.h \

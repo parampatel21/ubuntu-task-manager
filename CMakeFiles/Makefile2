@@ -54,10 +54,10 @@ RM = /usr/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /homes/ptpatel/cs252/task_manager
+CMAKE_SOURCE_DIR = /homes/ptpatel/cs252/lab6
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /homes/ptpatel/cs252/task_manager
+CMAKE_BINARY_DIR = /homes/ptpatel/cs252/lab6
 
 #=============================================================================
 # Directory level rules for the build root directory
@@ -81,14 +81,14 @@ clean: CMakeFiles/task_manager.dir/clean
 CMakeFiles/task_manager.dir/all:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/task_manager.dir/build.make CMakeFiles/task_manager.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/task_manager.dir/build.make CMakeFiles/task_manager.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/homes/ptpatel/cs252/task_manager/CMakeFiles --progress-num=1,2,3,4,5,6 "Built target task_manager"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/homes/ptpatel/cs252/lab6/CMakeFiles --progress-num=1,2,3,4,5,6 "Built target task_manager"
 .PHONY : CMakeFiles/task_manager.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/task_manager.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /homes/ptpatel/cs252/task_manager/CMakeFiles 6
+	$(CMAKE_COMMAND) -E cmake_progress_start /homes/ptpatel/cs252/lab6/CMakeFiles 6
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/task_manager.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /homes/ptpatel/cs252/task_manager/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /homes/ptpatel/cs252/lab6/CMakeFiles 0
 .PHONY : CMakeFiles/task_manager.dir/rule
 
 # Convenience name for target.

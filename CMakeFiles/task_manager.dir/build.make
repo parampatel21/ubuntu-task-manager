@@ -53,10 +53,10 @@ RM = /usr/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /homes/ptpatel/cs252/task_manager
+CMAKE_SOURCE_DIR = /homes/ptpatel/cs252/lab6
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /homes/ptpatel/cs252/task_manager
+CMAKE_BINARY_DIR = /homes/ptpatel/cs252/lab6
 
 # Include any dependencies generated for this target.
 include CMakeFiles/task_manager.dir/depend.make
@@ -72,72 +72,72 @@ include CMakeFiles/task_manager.dir/flags.make
 CMakeFiles/task_manager.dir/main.c.o: CMakeFiles/task_manager.dir/flags.make
 CMakeFiles/task_manager.dir/main.c.o: main.c
 CMakeFiles/task_manager.dir/main.c.o: CMakeFiles/task_manager.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/homes/ptpatel/cs252/task_manager/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building C object CMakeFiles/task_manager.dir/main.c.o"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/task_manager.dir/main.c.o -MF CMakeFiles/task_manager.dir/main.c.o.d -o CMakeFiles/task_manager.dir/main.c.o -c /homes/ptpatel/cs252/task_manager/main.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/homes/ptpatel/cs252/lab6/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building C object CMakeFiles/task_manager.dir/main.c.o"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/task_manager.dir/main.c.o -MF CMakeFiles/task_manager.dir/main.c.o.d -o CMakeFiles/task_manager.dir/main.c.o -c /homes/ptpatel/cs252/lab6/main.c
 
 CMakeFiles/task_manager.dir/main.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/task_manager.dir/main.c.i"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /homes/ptpatel/cs252/task_manager/main.c > CMakeFiles/task_manager.dir/main.c.i
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /homes/ptpatel/cs252/lab6/main.c > CMakeFiles/task_manager.dir/main.c.i
 
 CMakeFiles/task_manager.dir/main.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/task_manager.dir/main.c.s"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /homes/ptpatel/cs252/task_manager/main.c -o CMakeFiles/task_manager.dir/main.c.s
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /homes/ptpatel/cs252/lab6/main.c -o CMakeFiles/task_manager.dir/main.c.s
 
 CMakeFiles/task_manager.dir/gui/tabs_process.c.o: CMakeFiles/task_manager.dir/flags.make
 CMakeFiles/task_manager.dir/gui/tabs_process.c.o: gui/tabs_process.c
 CMakeFiles/task_manager.dir/gui/tabs_process.c.o: CMakeFiles/task_manager.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/homes/ptpatel/cs252/task_manager/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building C object CMakeFiles/task_manager.dir/gui/tabs_process.c.o"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/task_manager.dir/gui/tabs_process.c.o -MF CMakeFiles/task_manager.dir/gui/tabs_process.c.o.d -o CMakeFiles/task_manager.dir/gui/tabs_process.c.o -c /homes/ptpatel/cs252/task_manager/gui/tabs_process.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/homes/ptpatel/cs252/lab6/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building C object CMakeFiles/task_manager.dir/gui/tabs_process.c.o"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/task_manager.dir/gui/tabs_process.c.o -MF CMakeFiles/task_manager.dir/gui/tabs_process.c.o.d -o CMakeFiles/task_manager.dir/gui/tabs_process.c.o -c /homes/ptpatel/cs252/lab6/gui/tabs_process.c
 
 CMakeFiles/task_manager.dir/gui/tabs_process.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/task_manager.dir/gui/tabs_process.c.i"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /homes/ptpatel/cs252/task_manager/gui/tabs_process.c > CMakeFiles/task_manager.dir/gui/tabs_process.c.i
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /homes/ptpatel/cs252/lab6/gui/tabs_process.c > CMakeFiles/task_manager.dir/gui/tabs_process.c.i
 
 CMakeFiles/task_manager.dir/gui/tabs_process.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/task_manager.dir/gui/tabs_process.c.s"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /homes/ptpatel/cs252/task_manager/gui/tabs_process.c -o CMakeFiles/task_manager.dir/gui/tabs_process.c.s
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /homes/ptpatel/cs252/lab6/gui/tabs_process.c -o CMakeFiles/task_manager.dir/gui/tabs_process.c.s
 
 CMakeFiles/task_manager.dir/gui/tabs_system.c.o: CMakeFiles/task_manager.dir/flags.make
 CMakeFiles/task_manager.dir/gui/tabs_system.c.o: gui/tabs_system.c
 CMakeFiles/task_manager.dir/gui/tabs_system.c.o: CMakeFiles/task_manager.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/homes/ptpatel/cs252/task_manager/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building C object CMakeFiles/task_manager.dir/gui/tabs_system.c.o"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/task_manager.dir/gui/tabs_system.c.o -MF CMakeFiles/task_manager.dir/gui/tabs_system.c.o.d -o CMakeFiles/task_manager.dir/gui/tabs_system.c.o -c /homes/ptpatel/cs252/task_manager/gui/tabs_system.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/homes/ptpatel/cs252/lab6/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building C object CMakeFiles/task_manager.dir/gui/tabs_system.c.o"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/task_manager.dir/gui/tabs_system.c.o -MF CMakeFiles/task_manager.dir/gui/tabs_system.c.o.d -o CMakeFiles/task_manager.dir/gui/tabs_system.c.o -c /homes/ptpatel/cs252/lab6/gui/tabs_system.c
 
 CMakeFiles/task_manager.dir/gui/tabs_system.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/task_manager.dir/gui/tabs_system.c.i"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /homes/ptpatel/cs252/task_manager/gui/tabs_system.c > CMakeFiles/task_manager.dir/gui/tabs_system.c.i
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /homes/ptpatel/cs252/lab6/gui/tabs_system.c > CMakeFiles/task_manager.dir/gui/tabs_system.c.i
 
 CMakeFiles/task_manager.dir/gui/tabs_system.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/task_manager.dir/gui/tabs_system.c.s"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /homes/ptpatel/cs252/task_manager/gui/tabs_system.c -o CMakeFiles/task_manager.dir/gui/tabs_system.c.s
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /homes/ptpatel/cs252/lab6/gui/tabs_system.c -o CMakeFiles/task_manager.dir/gui/tabs_system.c.s
 
 CMakeFiles/task_manager.dir/gui/tabs_cpu.c.o: CMakeFiles/task_manager.dir/flags.make
 CMakeFiles/task_manager.dir/gui/tabs_cpu.c.o: gui/tabs_cpu.c
 CMakeFiles/task_manager.dir/gui/tabs_cpu.c.o: CMakeFiles/task_manager.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/homes/ptpatel/cs252/task_manager/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building C object CMakeFiles/task_manager.dir/gui/tabs_cpu.c.o"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/task_manager.dir/gui/tabs_cpu.c.o -MF CMakeFiles/task_manager.dir/gui/tabs_cpu.c.o.d -o CMakeFiles/task_manager.dir/gui/tabs_cpu.c.o -c /homes/ptpatel/cs252/task_manager/gui/tabs_cpu.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/homes/ptpatel/cs252/lab6/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building C object CMakeFiles/task_manager.dir/gui/tabs_cpu.c.o"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/task_manager.dir/gui/tabs_cpu.c.o -MF CMakeFiles/task_manager.dir/gui/tabs_cpu.c.o.d -o CMakeFiles/task_manager.dir/gui/tabs_cpu.c.o -c /homes/ptpatel/cs252/lab6/gui/tabs_cpu.c
 
 CMakeFiles/task_manager.dir/gui/tabs_cpu.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/task_manager.dir/gui/tabs_cpu.c.i"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /homes/ptpatel/cs252/task_manager/gui/tabs_cpu.c > CMakeFiles/task_manager.dir/gui/tabs_cpu.c.i
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /homes/ptpatel/cs252/lab6/gui/tabs_cpu.c > CMakeFiles/task_manager.dir/gui/tabs_cpu.c.i
 
 CMakeFiles/task_manager.dir/gui/tabs_cpu.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/task_manager.dir/gui/tabs_cpu.c.s"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /homes/ptpatel/cs252/task_manager/gui/tabs_cpu.c -o CMakeFiles/task_manager.dir/gui/tabs_cpu.c.s
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /homes/ptpatel/cs252/lab6/gui/tabs_cpu.c -o CMakeFiles/task_manager.dir/gui/tabs_cpu.c.s
 
 CMakeFiles/task_manager.dir/gui/tabs_memory.c.o: CMakeFiles/task_manager.dir/flags.make
 CMakeFiles/task_manager.dir/gui/tabs_memory.c.o: gui/tabs_memory.c
 CMakeFiles/task_manager.dir/gui/tabs_memory.c.o: CMakeFiles/task_manager.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/homes/ptpatel/cs252/task_manager/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building C object CMakeFiles/task_manager.dir/gui/tabs_memory.c.o"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/task_manager.dir/gui/tabs_memory.c.o -MF CMakeFiles/task_manager.dir/gui/tabs_memory.c.o.d -o CMakeFiles/task_manager.dir/gui/tabs_memory.c.o -c /homes/ptpatel/cs252/task_manager/gui/tabs_memory.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/homes/ptpatel/cs252/lab6/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building C object CMakeFiles/task_manager.dir/gui/tabs_memory.c.o"
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -MD -MT CMakeFiles/task_manager.dir/gui/tabs_memory.c.o -MF CMakeFiles/task_manager.dir/gui/tabs_memory.c.o.d -o CMakeFiles/task_manager.dir/gui/tabs_memory.c.o -c /homes/ptpatel/cs252/lab6/gui/tabs_memory.c
 
 CMakeFiles/task_manager.dir/gui/tabs_memory.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/task_manager.dir/gui/tabs_memory.c.i"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /homes/ptpatel/cs252/task_manager/gui/tabs_memory.c > CMakeFiles/task_manager.dir/gui/tabs_memory.c.i
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /homes/ptpatel/cs252/lab6/gui/tabs_memory.c > CMakeFiles/task_manager.dir/gui/tabs_memory.c.i
 
 CMakeFiles/task_manager.dir/gui/tabs_memory.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/task_manager.dir/gui/tabs_memory.c.s"
-	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /homes/ptpatel/cs252/task_manager/gui/tabs_memory.c -o CMakeFiles/task_manager.dir/gui/tabs_memory.c.s
+	/usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /homes/ptpatel/cs252/lab6/gui/tabs_memory.c -o CMakeFiles/task_manager.dir/gui/tabs_memory.c.s
 
 # Object files for target task_manager
 task_manager_OBJECTS = \
@@ -157,7 +157,7 @@ task_manager: CMakeFiles/task_manager.dir/gui/tabs_cpu.c.o
 task_manager: CMakeFiles/task_manager.dir/gui/tabs_memory.c.o
 task_manager: CMakeFiles/task_manager.dir/build.make
 task_manager: CMakeFiles/task_manager.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/homes/ptpatel/cs252/task_manager/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Linking C executable task_manager"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/homes/ptpatel/cs252/lab6/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Linking C executable task_manager"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/task_manager.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
@@ -169,6 +169,6 @@ CMakeFiles/task_manager.dir/clean:
 .PHONY : CMakeFiles/task_manager.dir/clean
 
 CMakeFiles/task_manager.dir/depend:
-	cd /homes/ptpatel/cs252/task_manager && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /homes/ptpatel/cs252/task_manager /homes/ptpatel/cs252/task_manager /homes/ptpatel/cs252/task_manager /homes/ptpatel/cs252/task_manager /homes/ptpatel/cs252/task_manager/CMakeFiles/task_manager.dir/DependInfo.cmake --color=$(COLOR)
+	cd /homes/ptpatel/cs252/lab6 && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /homes/ptpatel/cs252/lab6 /homes/ptpatel/cs252/lab6 /homes/ptpatel/cs252/lab6 /homes/ptpatel/cs252/lab6 /homes/ptpatel/cs252/lab6/CMakeFiles/task_manager.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : CMakeFiles/task_manager.dir/depend
 
