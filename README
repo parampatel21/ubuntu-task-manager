@@ -1,10 +1,21 @@
-how to compile project:
+Lab 6: Param Patel, Rohan Chava, Aneesh Chakravarthula
 
-navigate to project directory
+Technologies Used: GTK 3, C, CmakeFile, Makefile, Cairo Draw, /proc fileystem, various Linux commands, CSS
 
-rm -r build
-mkdir build
-cd build
-cmake ..
-make
-./task_manager
+
+FOR PROJECT GRADER:
+
+- *All commits made by Rohan Chava are under the username ubuntu*
+
+- We do **NOT** use a double click for our Detailed View for processes. **YOU MUST RIGHT CLICK AND SELECT PROPERTIES**
+
+- We have already run 'cmake ..', but if you wish to, go ahead and do it again.
+
+- **Run make to compile the project.**
+
+- Run **./task_manager** to intialize the application.
+
+
+DISCLAIMER:
+
+WE USED https://rosettacode.org/wiki/Linux_CPU_utilization FOR GRABBING THE CPU DATA (for graphs) AND ADAPTED IT TO MY NEEDS.

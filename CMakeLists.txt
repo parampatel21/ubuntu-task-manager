@@ -17,12 +17,6 @@ add_executable(task_manager main.c
         gui/tabs_cpu.c
         gui/tabs_cpu.h
         gui/tabs_memory.c
-        gui/tabs_memory.h
-        system_info.c
-        system_info.h
-        process_info.c
-        process_info.h
-        memory_info.c
-        memory_info.h)
+        gui/tabs_memory.h)
 
 target_link_libraries(task_manager ${GTK3_LIBRARIES})

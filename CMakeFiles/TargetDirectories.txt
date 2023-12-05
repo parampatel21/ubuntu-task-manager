@@ -1,0 +1,3 @@
+/homes/ptpatel/cs252/task_manager/CMakeFiles/task_manager.dir
+/homes/ptpatel/cs252/task_manager/CMakeFiles/edit_cache.dir
+/homes/ptpatel/cs252/task_manager/CMakeFiles/rebuild_cache.dir
