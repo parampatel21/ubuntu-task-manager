@@ -425,6 +425,7 @@ void display_open_files_dialog(GtkListStore *store) {
 void list_properties(GtkWidget *widget, GtkListStore *store) {
     pid_t pid = get_pid_from_model(store);
     if (pid == -1) {
+        // Handle error: no PID found
         g_print("No process selected.\n");
         return;
     }
@@ -432,7 +433,7 @@ void list_properties(GtkWidget *widget, GtkListStore *store) {
     char file_name[256];
     sprintf(file_name, "/proc/%d/status", pid);
 
-    FILE *fp = popen(file_name, "r");
+    FILE *fp = fopen(file_name, "r");
     if (fp == NULL) {
         perror("Failed to find process");
         return;
@@ -442,7 +443,18 @@ void list_properties(GtkWidget *widget, GtkListStore *store) {
     char line[1024];
     while (fgets(line, sizeof(line), fp)) {
         if (sscanf(line, "Name: %s", details.process_name) == 1) continue;
-        if (sscanf(line, "State: %s", details.status) == 1) continue;
+        if (sscanf(line, "VmRSS: %ld %*s", &details.memory) == 1) continue;
+        if (sscanf(line, "VmSize: %ld %*s", &details.vmsize) == 1) continue;
+        if (sscanf(line, "RssFile: %ld %*s", &details.rss) == 1) continue;
+        if (sscanf(line, "RssShmem: %ld %*s", &details.shared) == 1) continue;
+        if (sscanf(line, "State: %*s (%s)", details.status) == 1) {
+            size_t len = strlen(details.status);
+            details.status[len-1] = '\0';
+            if (details.status[0] >= 'a' && details.status[0] <= 'z') {
+                details.status[0] -= 'a' - 'A';
+            }
+            continue;
+        }
         if (strncmp(line, "Uid:", 4) == 0) {
             uid_t uid;
             sscanf(line, "Uid: %u %*d %*d %*d", &uid);
@@ -465,6 +477,44 @@ void list_properties(GtkWidget *widget, GtkListStore *store) {
                                              0, "Status",
                                              1, details.status,
                                              -1);
+    char l_mem[25];
+    double d_mem = (double) details.memory / 1024;
+    sprintf(l_mem, "%.1lf MiB", (double) (details.memory / 1024));
+    gtk_list_store_insert_with_values(open_files_store, NULL, -1,
+                                             0, "Memory",
+                                             1, l_mem,
+                                             -1);
+    sprintf(l_mem, "%.1lf MiB", (double) (details.vmsize / 1024));
+    gtk_list_store_insert_with_values(open_files_store, NULL, -1,
+                                             0, "Virtual Memory",
+                                             1, l_mem,
+                                             -1);
+    sprintf(l_mem, "%.1lf MiB", (double) (details.rss / 1024));
+    gtk_list_store_insert_with_values(open_files_store, NULL, -1,
+                                             0, "Resident Memory",
+                                             1, l_mem,
+                                             -1);
+    gtk_list_store_insert_with_values(open_files_store, NULL, -1,
+                                             0, "Writable Memory",
+                                             1, "N/A",
+                                             -1);
+    sprintf(l_mem, "%.1lf MiB", (double) (details.shared / 1024));
+    gtk_list_store_insert_with_values(open_files_store, NULL, -1,
+                                             0, "Shared Memory",
+                                             1, l_mem,
+                                             -1);
+    gtk_list_store_insert_with_values(open_files_store, NULL, -1,
+                                             0, "X Server Memory",
+                                             1, "N/A",
+                                             -1);
+    gtk_list_store_insert_with_values(open_files_store, NULL, -1,
+                                             0, "CPU",
+                                             1, "0%",
+                                             -1);
+    gtk_list_store_insert_with_values(open_files_store, NULL, -1,
+                                             0, "Nice",
+                                             1, "0",
+                                             -1);
     display_process_details(open_files_store);
 
 } /* list_properties() */
@@ -476,6 +526,7 @@ void display_process_details(GtkListStore *store) {
     GtkCellRenderer *renderer;
     GtkTreeViewColumn *column;
 
+    // Create a dialog window with a title
     dialog = gtk_dialog_new_with_buttons("Process Properties",
                                          NULL,
                                          GTK_DIALOG_MODAL,
@@ -485,23 +536,31 @@ void display_process_details(GtkListStore *store) {
 
     gtk_window_set_default_size(GTK_WINDOW(dialog), 500, 500);
 
+    // Create a scrolled window and add it to the dialog's content area
     scrolled_window = gtk_scrolled_window_new(NULL, NULL);
     gtk_box_pack_start(GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dialog))),
                        scrolled_window, TRUE, TRUE, 0);
 
+    // Create a tree view with the list store as its model
     tree_view = gtk_tree_view_new_with_model(GTK_TREE_MODEL(store));
 
+    // Add columns to the tree view
+    add_proc_column(tree_view, "", 0);
+    add_proc_column(tree_view, "", 1);
 
+    // Add the tree view to the scrolled window
     gtk_container_add(GTK_CONTAINER(scrolled_window), tree_view);
 
+    // Show all widgets in the dialog
     gtk_widget_show_all(dialog);
 
+    // Run the dialog and wait for a response
     gtk_dialog_run(GTK_DIALOG(dialog));
 
+    // Destroy the dialog after closing it
     gtk_widget_destroy(dialog);
 
 } /* display_open_files_dialog() */
-
 
 
 // Function to create a context menu for right-click on text view
