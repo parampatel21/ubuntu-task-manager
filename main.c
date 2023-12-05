@@ -48,11 +48,10 @@ int main(int argc, char *argv[]) {
 
     AppData3 data3 = {0};
 
-    add_cpu_tab(notebook, &data, &data2, &data3);
-
-    add_memory_tab(notebook);
-    add_process_tab(notebook);
     add_system_tab(notebook);
+    add_process_tab(notebook);
+    add_cpu_tab(notebook, &data, &data2, &data3);
+    add_memory_tab(notebook);
 
     gtk_widget_show_all(window);
 

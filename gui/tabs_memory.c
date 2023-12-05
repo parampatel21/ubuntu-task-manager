@@ -168,7 +168,7 @@ void add_progress_column(GtkWidget *tree_view, const char *title, int column_id)
  */
 
 void add_memory_tab(GtkWidget *notebook) {
-    GtkWidget *memory_label = gtk_label_new("Memory");
+    GtkWidget *memory_label = gtk_label_new("File Systems");
     GtkWidget *memory_tab = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
 
     GtkListStore *store = gtk_list_store_new(8, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_INT);
